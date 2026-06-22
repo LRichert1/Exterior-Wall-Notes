@@ -1,0 +1,14 @@
+{
+  "name": "Exterior Wall Notes",
+  "short_name": "Wall Notes",
+  "description": "Johnson Engineering field form for recording exterior wall notes barn-by-barn.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f6f8",
+  "theme_color": "#1f4e79",
+  "icons": [
+    { "src": "Wall_Notes_icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

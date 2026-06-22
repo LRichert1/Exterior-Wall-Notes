@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Exterior Wall Notes</title>
+<!-- Home-screen app (iPad/iPhone "Add to Home Screen"): full-screen launch, name + icon -->
+<meta name="theme-color" content="#1f4e79">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wall Notes">
+<link rel="apple-touch-icon" href="Wall_Notes_icon.png">
+<link rel="icon" type="image/png" href="Wall_Notes_icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root{
+    --bg:#f4f6f8; --panel:#ffffff; --ink:#1f2933; --muted:#6b7785;
+    --line:#d9e0e6; --line-strong:#b9c4cd;
+    --brand:#1f4e79; --brand-700:#16395a; --brand-50:#eaf1f8;
+    --accent:#2f80b8;
+    --danger:#b42318; --danger-bg:#fdecea;
+    --ok:#2e7d32;
+    --shadow:0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.10);
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;
+    color:var(--ink); background:var(--bg); font-size:15px; line-height:1.45;
+  }
+  button{font-family:inherit}
+  input,textarea{font-family:inherit;font-size:15px;color:var(--ink)}
+  .wrap{max-width:1040px;margin:0 auto;padding:20px 18px 60px}
+
+  /* ---------- Top brand bar ---------- */
+  .appbar{
+    background:var(--brand); color:#fff;
+    display:flex;align-items:center;gap:12px;
+    padding:12px 18px; box-shadow:var(--shadow);
+  }
+  .appbar .logo{font-weight:700;letter-spacing:.3px}
+  .appbar .sub{opacity:.8;font-size:13px}
+  .appbar .spacer{flex:1}
+  .appbar .siteTag{
+    background:rgba(255,255,255,.14); padding:4px 10px;border-radius:999px;
+    font-size:13px; display:none; align-items:center; gap:6px;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    border:1px solid var(--line-strong); background:#fff; color:var(--ink);
+    padding:8px 14px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600;
+    display:inline-flex;align-items:center;gap:7px;transition:.12s;
+  }
+  .btn:hover{background:#f3f6f9}
+  .btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+  .btn.primary:hover{background:var(--brand-700)}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn.sm{padding:6px 10px;font-size:13px}
+
+  /* ---------- Cards ---------- */
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* ---------- Setup screen ---------- */
+  #setup .card{max-width:640px;margin:34px auto;padding:26px 28px}
+  #setup h1{margin:0 0 4px;font-size:22px;color:var(--brand-700)}
+  #setup p.lead{margin:0 0 22px;color:var(--muted)}
+  .field{margin-bottom:20px}
+  .field label{display:block;font-weight:600;margin-bottom:7px}
+  .field .hint{font-weight:400;color:var(--muted);font-size:13px}
+  input.text{
+    width:100%;padding:11px 12px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;
+  }
+  input.text:focus,textarea:focus,input.loc:focus{outline:2px solid var(--brand-50);border-color:var(--brand)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:520px){.row2{grid-template-columns:1fr}}
+
+  .qtylist{display:flex;flex-direction:column;gap:10px}
+  .qtyrow{
+    display:flex;align-items:center;gap:12px;border:1px solid var(--line-strong);
+    border-radius:9px;padding:9px 14px;background:#fff;transition:.12s;
+  }
+  .qtyrow.on{border-color:var(--brand);background:var(--brand-50);box-shadow:inset 0 0 0 1px var(--brand)}
+  .qtyrow .qnm{font-weight:600;flex:1}
+  .stepper{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:8px;overflow:hidden;background:#fff}
+  .stepper button{width:38px;height:38px;border:none;background:#f3f6f9;font-size:21px;line-height:1;cursor:pointer;color:var(--brand);font-weight:700}
+  .stepper button:hover{background:var(--brand-50)}
+  .stepper input{width:46px;height:38px;border:none;border-left:1px solid var(--line);border-right:1px solid var(--line);text-align:center;font-size:15px;font-weight:600;-moz-appearance:textfield}
+  .stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+
+  .setup-note{font-size:12.5px;color:var(--muted);margin:10px 0 18px}
+  .setup-actions{display:flex;gap:12px;align-items:center;margin-top:8px}
+  .setup-actions .spacer{flex:1}
+  .resume{margin:0 auto 18px;max-width:640px}
+  .resume .card{display:flex;gap:12px;align-items:center;padding:14px 18px;border-left:4px solid var(--accent)}
+  .resume .card .t{font-weight:600}
+  .resume .card .m{color:var(--muted);font-size:13px}
+
+  /* ---------- Form screen ---------- */
+  #form{display:none}
+  .toolbar{
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0 14px;
+  }
+  .toolbar .spacer{flex:1}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end;border-bottom:2px solid var(--line);margin-bottom:0}
+  .tab{
+    border:1px solid var(--line);border-bottom:none;background:#eef2f5;color:var(--muted);
+    padding:10px 18px;border-radius:9px 9px 0 0;cursor:pointer;font-weight:600;position:relative;top:2px;
+  }
+  .tab:hover{color:var(--ink)}
+  .tab.active{background:var(--panel);color:var(--brand-700);border-color:var(--line);border-bottom:2px solid var(--panel)}
+  .addwrap{position:relative;display:inline-block}
+  .addbtn{
+    border:1px dashed var(--line-strong);background:#fff;color:var(--brand);
+    padding:9px 14px;border-radius:9px;cursor:pointer;font-weight:600;position:relative;top:2px;
+  }
+  .addbtn:hover{background:var(--brand-50);border-color:var(--brand)}
+  .addmenu{
+    position:absolute;top:46px;left:0;background:#fff;border:1px solid var(--line-strong);
+    border-radius:8px;box-shadow:0 8px 24px rgba(16,24,40,.16);padding:6px;z-index:30;min-width:180px;display:none;
+  }
+  .addmenu.open{display:block}
+  .addmenu .mhdr{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:5px 10px 7px}
+  .addmenu .mi{display:block;width:100%;text-align:left;border:none;background:transparent;padding:9px 12px;border-radius:6px;cursor:pointer;font-size:14px;color:var(--ink)}
+  .addmenu .mi:hover{background:var(--brand-50)}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:20px 22px}
+  .panel h2{margin:0 0 3px;font-size:20px;color:var(--brand-700)}
+  .panel .barnsub{color:var(--muted);font-size:13px;margin-bottom:10px}
+  .barnctl{display:flex;gap:8px;margin:0 0 16px;flex-wrap:wrap}
+  .barnctl button{
+    border:1px solid var(--line);background:#fff;color:var(--muted);font-size:12.5px;font-weight:600;
+    padding:5px 11px;border-radius:7px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;
+  }
+  .barnctl button:hover{background:#f3f6f9;color:var(--ink)}
+  .barnctl button.danger:hover{background:var(--danger-bg);color:var(--danger);border-color:#f3c0bb}
+
+  .tablehdr{display:flex;align-items:center;margin:6px 0 8px}
+  .tablehdr h3{margin:0;font-size:16px}
+  .tablehdr .spacer{flex:1}
+  .tablehdr .count{color:var(--muted);font-size:13px}
+
+  .rowhead{
+    display:grid;grid-template-columns:290px 1fr 36px;gap:10px;
+    padding:0 2px 6px;font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;
+  }
+  .rows{display:flex;flex-direction:column;gap:8px}
+  .trow{display:grid;grid-template-columns:290px 1fr 36px;gap:10px;align-items:start}
+  .trow input.loc{
+    padding:10px 11px;border:1px solid var(--line-strong);border-radius:8px;width:100%;
+  }
+  .trow select.notes{
+    padding:9px 11px;border:1px solid var(--line-strong);border-radius:8px;width:100%;
+    height:42px;line-height:1.45;font-size:15px;background:#fff;color:var(--ink);cursor:pointer;
+  }
+  .trow select.notes:focus{outline:2px solid var(--brand-50);border-color:var(--brand)}
+  .trow select.notes.unset{color:var(--muted)}
+  .trow.empty input.loc, .trow.empty select.notes{background:#fcfdfe;border-style:dashed}
+  .trow .del{
+    border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;
+    width:36px;height:42px;border-radius:8px;font-size:18px;line-height:1;visibility:hidden;
+  }
+  .trow .del:hover{background:var(--danger-bg);color:var(--danger);border-color:#f3c0bb}
+  .trow.filled .del{visibility:visible}
+  @media(max-width:560px){
+    .rowhead,.trow{grid-template-columns:1fr 36px}
+    .rowhead .rh-notes{display:none}
+    .trow select.notes{grid-column:1 / 2}
+    .trow .del{grid-row:1 / 3}
+  }
+
+  .barnfields{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0 4px}
+  @media(max-width:620px){.barnfields{grid-template-columns:1fr}}
+  .bfield label{display:block;font-weight:600;margin-bottom:7px}
+  .bfield .sub{font-weight:400;color:var(--muted);font-size:12.5px}
+  input.rebound{
+    width:100%;padding:10px 12px;border:1px solid var(--line-strong);border-radius:8px;background:#fff;
+  }
+  input.rebound:focus{outline:2px solid var(--brand-50);border-color:var(--brand)}
+  textarea.general{
+    width:100%;min-height:60px;padding:10px 12px;border:1px solid var(--line-strong);border-radius:8px;
+    resize:vertical;line-height:1.5;
+  }
+
+  .footnote{color:var(--muted);font-size:12.5px;margin-top:14px;display:flex;align-items:center;gap:7px}
+
+  .toast{
+    position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--brand-700);color:#fff;padding:11px 18px;border-radius:9px;box-shadow:0 6px 20px rgba(0,0,0,.25);
+    opacity:0;pointer-events:none;transition:.25s;font-size:14px;z-index:50;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ---------- Print report ---------- */
+  #printArea{display:none}
+  @media print{
+    .appbar,.toolbar,.tabs,.panel,#setup,.resume,.toast{display:none !important}
+    body{background:#fff}
+    .wrap{max-width:none;padding:0}
+    #printArea{display:block}
+    .phead{margin:0 0 14px}
+    .phead h1{font-size:18px;margin:0 0 2px;color:#000}
+    .phead .pmeta{font-size:12px;color:#333}
+    .pbarn{page-break-after:always;padding:6px 0 0}
+    .pbarn:last-child{page-break-after:auto}
+    .pbarn h2{font-size:16px;margin:0 0 8px;color:#000}
+    table.ptab{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+    table.ptab th,table.ptab td{border:1px solid #555;padding:5px 8px;text-align:left;vertical-align:top}
+    table.ptab th{background:#e8eef4}
+    table.ptab td.lcol{width:28%}
+    .pbarn .pline{font-size:12px;margin:3px 0;white-space:pre-wrap}
+    .pbarn .pline b{color:#000}
+  }
+</style>
+</head>
+<body>
+
+<div class="appbar">
+  <span class="logo">Johnson Engineering</span>
+  <span class="sub">Exterior Wall Notes</span>
+  <span class="spacer"></span>
+  <span class="siteTag" id="siteTag">📍 <b id="siteTagName"></b></span>
+</div>
+
+<!-- ============ SETUP SCREEN ============ -->
+<section id="setup" class="wrap">
+  <div class="resume" id="resumeBox" style="display:none">
+    <div class="card">
+      <div style="flex:1">
+        <div class="t">Resume previous session</div>
+        <div class="m" id="resumeMeta"></div>
+      </div>
+      <button class="btn" id="resumeDiscard">Discard</button>
+      <button class="btn primary" id="resumeBtn">Resume</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h1>Exterior Wall Notes</h1>
+    <p class="lead">Set up this assessment, then choose which barns are on site and how many of each. Each barn becomes its own tab.</p>
+
+    <div class="field">
+      <label for="siteInput">Site <span class="hint">(e.g., M25)</span></label>
+      <input class="text" id="siteInput" type="text" placeholder="Enter site name or number" autocomplete="off">
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label for="dateInput">Date</label>
+        <input class="text" id="dateInput" type="date">
+      </div>
+      <div class="field">
+        <label for="nameInput">Name <span class="hint">(recorded by)</span></label>
+        <input class="text" id="nameInput" type="text" placeholder="Inspector / engineer" autocomplete="off">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Which barns are at this site, and how many? <span class="hint">(set a count for each)</span></label>
+      <div class="qtylist" id="barnList"></div>
+    </div>
+    <div class="setup-note">Tip: you can still add, duplicate, rename or remove barns once you’re in the form.</div>
+
+    <div class="setup-actions">
+      <button class="btn" id="loadFileBtn">📂 Open saved file…</button>
+      <span class="spacer"></span>
+      <button class="btn primary" id="startBtn" disabled>Open form →</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FORM SCREEN ============ -->
+<section id="form" class="wrap">
+  <div class="toolbar">
+    <button class="btn sm" id="setupBtn">⚙ Setup</button>
+    <span class="spacer"></span>
+    <button class="btn sm" id="saveBtn">💾 Save file</button>
+    <button class="btn sm" id="openBtn">📂 Open</button>
+    <button class="btn sm" id="printBtn">🖨 Print</button>
+    <button class="btn sm primary" id="xlsxBtn">⬇ Export to Excel</button>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="panel" id="panel"></div>
+</section>
+
+<div id="printArea"></div>
+<div class="toast" id="toast"></div>
+
+<!-- quick-pick suggestions for the Location field (populated from DEFAULT_LOCATIONS at load) -->
+<datalist id="locOptions"></datalist>
+
+<!-- hidden file input for loading -->
+<input type="file" id="fileInput" accept=".html,.json,text/html,application/json" style="display:none">
+
+<script>
+"use strict";
+
+/* ------------------------------------------------------------------ *
+ *  Barn types.  Tab title shown on each panel/sheet is:
+ *    "Exterior Wall Notes for " + instance name
+ *  (matches the original workbook: "Exterior Wall Notes for Breeding",
+ *   "...for Gestation", "...for Isolation Barn", etc.)
+ * ------------------------------------------------------------------ */
+const BARN_TYPES = [
+  {key:"Gestation", label:"Gestation"},
+  {key:"Farrowing", label:"Farrowing"},
+  {key:"Breeding",  label:"Breeding"},
+  {key:"GDU",       label:"GDU"},
+  {key:"Isolation", label:"Isolation Barn"},
+];
+const BTYPE = Object.fromEntries(BARN_TYPES.map(b=>[b.key,b]));
+const typeRank = k => BARN_TYPES.findIndex(b=>b.key===k);
+const AUTOSAVE_KEY = "ewallNotes.autosave.v1";
+
+/* ------------------------------------------------------------------ *
+ *  State.  Barns are keyed by a generated instance id; each instance
+ *  has {type, name, rebound, general, rows}.  A site can hold several
+ *  of one type (e.g. two Gestation barns -> "Gestation 1"/"Gestation 2").
+ * ------------------------------------------------------------------ */
+let STATE = { site:"", date:"", inspector:"", order:[], barns:{}, active:null };
+let PRISTINE_HTML = "";           // clean copy of this page, captured at load, used for "Save"
+let _rid = 1, _bid = 1;
+const newRow = (location="",notes="")=>({id:_rid++, location, notes});
+const newId  = ()=>"b"+(_bid++);
+// Standard exterior-wall checkpoints, pre-listed in each barn so the field
+// inspector only fills in the reading. Clockwise: each corner with its two
+// adjacent walls (N→E→S→W). Fully editable — rows can be deleted or added.
+const DEFAULT_LOCATIONS = [
+  "Northeast corner – North side",
+  "Northeast corner – East side",
+  "Southeast corner – East side",
+  "Southeast corner – South side",
+  "Southwest corner – South side",
+  "Southwest corner – West side",
+  "Northwest corner – West side",
+  "Northwest corner – North side",
+];
+// Fixed set of plumb/level readings offered in the Notes dropdown.
+const NOTES_OPTIONS = ['level','1/4" top in','1/4" top out','1/8" top in','1/8" top out','1/2" top in','1/2" top out'];
+const makeBarn = (type,name)=>({type, name, rebound:"", general:"",
+  rows:[ ...DEFAULT_LOCATIONS.map(loc=>newRow(loc)), newRow() ]});
+
+/* ------------------------------------------------------------------ *
+ *  Small helpers
+ * ------------------------------------------------------------------ */
+const $ = sel => document.querySelector(sel);
+const el = (tag, props={}, kids=[]) => {
+  const n = document.createElement(tag);
+  for (const k in props){
+    if (k==="class") n.className = props[k];
+    else if (k==="text") n.textContent = props[k];
+    else if (k.startsWith("on") && typeof props[k]==="function") n.addEventListener(k.slice(2), props[k]);
+    else if (props[k]!==null && props[k]!==undefined) n.setAttribute(k, props[k]);
+  }
+  for (const c of [].concat(kids)) if (c) n.appendChild(typeof c==="string"?document.createTextNode(c):c);
+  return n;
+};
+const rowEmpty = r => !r.location.trim() && !r.notes.trim();
+const titleFor = b => "Exterior Wall Notes for " + b.name;
+function safeName(s){ return (s||"").replace(/[\\/:*?"<>|]+/g,"-").trim(); }
+function instancesOfType(type){ return STATE.order.filter(id=>STATE.barns[id].type===type); }
+function barnHasData(id){
+  const b=STATE.barns[id];
+  return (b.rebound||"").trim()!=="" || (b.general||"").trim()!=="" || b.rows.some(r=>!rowEmpty(r));
+}
+function todayIso(){
+  const d=new Date(), p=n=>String(n).padStart(2,"0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
+}
+function fmtDate(iso){
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||"");
+  if(!m) return iso||"";
+  return new Date(+m[1],+m[2]-1,+m[3]).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+}
+function subLine(){
+  const p=[];
+  if(STATE.site) p.push("Site: "+STATE.site);
+  if(STATE.date) p.push(fmtDate(STATE.date));
+  if(STATE.inspector) p.push("Recorded by "+STATE.inspector);
+  return p.join("  ·  ");
+}
+
+let _toastT=null;
+function toast(msg){
+  const t=$("#toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(_toastT); _toastT=setTimeout(()=>t.classList.remove("show"),2000);
+}
+
+/* ------------------------------------------------------------------ *
+ *  Autosave (best-effort; the saved file is the reliable store)
+ * ------------------------------------------------------------------ */
+function autosave(){
+  try{ localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(serialize())); }catch(e){/* file:// may block */}
+}
+function serialize(){
+  return {
+    version:1, savedAt:new Date().toISOString(),
+    site:STATE.site, date:STATE.date, inspector:STATE.inspector, order:STATE.order.slice(),
+    barns:Object.fromEntries(STATE.order.map(id=>{
+      const b=STATE.barns[id];
+      return [id,{
+        type:b.type, name:b.name, rebound:b.rebound, general:b.general,
+        rows:b.rows.filter(r=>!rowEmpty(r)).map(r=>({location:r.location, notes:r.notes}))
+      }];
+    }))
+  };
+}
+function deserialize(data){
+  STATE = { site:data.site||"", date:data.date||"", inspector:data.inspector||"", order:[], barns:{}, active:null };
+  _bid = 1;
+  (data.order||[]).forEach(oldId=>{
+    const b = (data.barns && data.barns[oldId]) || {};
+    let type = b.type || (BTYPE[oldId] ? oldId : null);
+    if (!BTYPE[type]) return;                              // skip unknown types
+    const id = newId();
+    const name = b.name || BTYPE[type].label;
+    const rows = (b.rows||[]).map(r=>newRow(r.location||r.truss||"", r.notes||""));
+    STATE.barns[id] = { type, name, rebound:b.rebound||"", general:b.general||"", rows };
+    STATE.order.push(id);
+    ensureTrailingEmpty(id);
+  });
+  STATE.active = STATE.order[0] || null;
+}
+
+/* ------------------------------------------------------------------ *
+ *  Row maintenance — always keep exactly one trailing empty row
+ * ------------------------------------------------------------------ */
+function ensureTrailingEmpty(id){
+  const rows = STATE.barns[id].rows;
+  if (rows.length===0 || !rowEmpty(rows[rows.length-1])) rows.push(newRow());
+}
+
+/* ================================================================== *
+ *  SETUP SCREEN
+ * ================================================================== */
+function buildSetup(){
+  const list = $("#barnList"); list.innerHTML="";
+  BARN_TYPES.forEach(b=>{
+    const inp = el("input",{class:"qty",type:"number",min:"0",value:"0",inputmode:"numeric","aria-label":b.label+" count"});
+    const dec = el("button",{class:"dec",type:"button",text:"−","aria-label":"decrease"});
+    const inc = el("button",{class:"inc",type:"button",text:"+","aria-label":"increase"});
+    const row = el("div",{class:"qtyrow"},[
+      el("span",{class:"qnm",text:b.label}),
+      el("div",{class:"stepper"},[dec,inp,inc])
+    ]);
+    row.dataset.type = b.key;
+    const sync = ()=>{
+      let v = parseInt(inp.value,10); if(isNaN(v)||v<0) v=0; if(v>99) v=99;
+      inp.value=v; row.classList.toggle("on", v>0); refreshStart();
+    };
+    dec.addEventListener("click", ()=>{ inp.value=Math.max(0,(parseInt(inp.value,10)||0)-1); sync(); });
+    inc.addEventListener("click", ()=>{ inp.value=(parseInt(inp.value,10)||0)+1; sync(); });
+    inp.addEventListener("input", sync);
+    inp.addEventListener("change", sync);
+    list.appendChild(row);
+  });
+  if(!$("#dateInput").value) $("#dateInput").value = todayIso();
+  $("#siteInput").addEventListener("input", refreshStart);
+  refreshStart();
+}
+function setupCounts(){
+  const m={};
+  document.querySelectorAll("#barnList .qtyrow").forEach(row=>{
+    const v = parseInt(row.querySelector(".qty").value,10)||0;
+    if (v>0) m[row.dataset.type]=v;
+  });
+  return m;
+}
+function totalSetupQty(){ return Object.values(setupCounts()).reduce((a,b)=>a+b,0); }
+function refreshStart(){
+  const ok = $("#siteInput").value.trim()!=="" && totalSetupQty()>0;
+  $("#startBtn").disabled = !ok;
+}
+function prefillSetup(){
+  $("#siteInput").value = STATE.site||"";
+  $("#dateInput").value = STATE.date||todayIso();
+  $("#nameInput").value = STATE.inspector||"";
+  const counts={};
+  STATE.order.forEach(id=>{ const t=STATE.barns[id].type; counts[t]=(counts[t]||0)+1; });
+  document.querySelectorAll("#barnList .qtyrow").forEach(row=>{
+    const v = counts[row.dataset.type]||0;
+    row.querySelector(".qty").value = v;
+    row.classList.toggle("on", v>0);
+  });
+  refreshStart();
+}
+// Is this name still an auto-generated one ("Gestation" or "Gestation 2")?
+function isAutoName(name, label){
+  if (name===label) return true;
+  const esc = label.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+  return new RegExp("^"+esc+" \\d+$").test(name);
+}
+function renumberAll(){
+  BARN_TYPES.forEach(tp=>{
+    const ids = instancesOfType(tp.key);
+    if (ids.length===1){
+      const id=ids[0];
+      if (isAutoName(STATE.barns[id].name, tp.label)) STATE.barns[id].name = tp.label;
+    } else {
+      let n=0;
+      ids.forEach(id=>{ if (isAutoName(STATE.barns[id].name, tp.label)){ n++; STATE.barns[id].name = tp.label+" "+n; } });
+    }
+  });
+}
+function startFromSetup(){
+  const site = $("#siteInput").value.trim();
+  const counts = setupCounts();
+  if (!site || totalSetupQty()===0) return;
+
+  // Warn before removing any barn that already has data entered.
+  const losing=[];
+  BARN_TYPES.forEach(tp=>{
+    const target=counts[tp.key]||0, cur=instancesOfType(tp.key);
+    for(let i=target;i<cur.length;i++) if(barnHasData(cur[i])) losing.push(STATE.barns[cur[i]].name);
+  });
+  if (losing.length && !confirm("Lowering the count will remove these barns and their notes:\n\n  • "+losing.join("\n  • ")+"\n\nContinue?")) return;
+
+  STATE.site = site;
+  STATE.date = $("#dateInput").value || "";
+  STATE.inspector = $("#nameInput").value.trim();
+
+  // Reconcile each type's instance count to the chosen target.
+  BARN_TYPES.forEach(tp=>{
+    const target = counts[tp.key]||0;
+    let cur = instancesOfType(tp.key);
+    while (cur.length > target){                 // remove extras from the end
+      const id = cur.pop();
+      STATE.order.splice(STATE.order.indexOf(id),1);
+      delete STATE.barns[id];
+    }
+    while (cur.length < target){                 // add missing
+      const id = newId();
+      STATE.barns[id] = makeBarn(tp.key, tp.label);
+      STATE.order.push(id); cur.push(id);
+    }
+  });
+  renumberAll();
+  STATE.order.sort((a,b)=> typeRank(STATE.barns[a].type)-typeRank(STATE.barns[b].type));
+  if (!STATE.active || !STATE.barns[STATE.active]) STATE.active = STATE.order[0];
+  STATE.order.forEach(ensureTrailingEmpty);
+  showForm();
+}
+
+/* ================================================================== *
+ *  INSTANCE MANAGEMENT  (Add / Duplicate / Rename / Remove)
+ * ================================================================== */
+function autoName(type){
+  const label = BTYPE[type].label;
+  const sibs = instancesOfType(type);
+  if (sibs.length===0) return label;
+  if (sibs.length===1 && STATE.barns[sibs[0]].name===label){
+    STATE.barns[sibs[0]].name = label+" 1";
+    return label+" 2";
+  }
+  let max = sibs.length;
+  sibs.forEach(id=>{ const m=/(\d+)\s*$/.exec(STATE.barns[id].name); if(m) max=Math.max(max, +m[1]); });
+  return label+" "+(max+1);
+}
+function addInstance(type){
+  const id=newId();
+  const name=autoName(type);
+  const sibs=instancesOfType(type);
+  STATE.barns[id]=makeBarn(type, name);
+  const insertAt = sibs.length ? STATE.order.indexOf(sibs[sibs.length-1])+1 : STATE.order.length;
+  STATE.order.splice(insertAt,0,id); STATE.active=id;
+  renderTabs(); renderPanel(); autosave();
+  toast("Added "+STATE.barns[id].name);
+}
+function duplicateActive(){
+  const cur=STATE.barns[STATE.active];
+  const id=newId();
+  STATE.barns[id]={ type:cur.type, name:autoName(cur.type), rebound:cur.rebound, general:cur.general,
+    rows:cur.rows.filter(r=>!rowEmpty(r)).map(r=>newRow(r.location,r.notes)) };
+  ensureTrailingEmpty(id);
+  const i=STATE.order.indexOf(STATE.active);
+  STATE.order.splice(i+1,0,id); STATE.active=id;
+  renderTabs(); renderPanel(); autosave();
+  toast("Duplicated to "+STATE.barns[id].name);
+}
+function renameActive(){
+  const cur=STATE.barns[STATE.active];
+  const name=prompt("Rename this barn tab:", cur.name);
+  if(name===null) return;
+  const v=name.trim(); if(!v){ toast("Name can’t be blank"); return; }
+  cur.name=v; renderTabs(); renderPanel(); autosave();
+}
+function removeActive(){
+  if(STATE.order.length<=1){ toast("Keep at least one barn"); return; }
+  const cur=STATE.barns[STATE.active];
+  if(!confirm("Remove “"+cur.name+"” and all of its notes?")) return;
+  const i=STATE.order.indexOf(STATE.active);
+  STATE.order.splice(i,1); delete STATE.barns[STATE.active];
+  STATE.active=STATE.order[Math.max(0,i-1)];
+  renderTabs(); renderPanel(); autosave();
+}
+
+/* ================================================================== *
+ *  FORM SCREEN
+ * ================================================================== */
+function showSetup(){
+  $("#form").style.display="none";
+  $("#setup").style.display="block";
+  $("#siteTag").style.display="none";
+  prefillSetup();
+}
+function showForm(){
+  $("#setup").style.display="none";
+  $("#form").style.display="block";
+  $("#siteTag").style.display="inline-flex";
+  $("#siteTagName").textContent = STATE.site + (STATE.date? " · "+fmtDate(STATE.date):"");
+  renderTabs();
+  renderPanel();
+  autosave();
+}
+
+function renderTabs(){
+  const tabs = $("#tabs"); tabs.innerHTML="";
+  STATE.order.forEach(id=>{
+    const b = STATE.barns[id];
+    const t = el("div",{class:"tab"+(id===STATE.active?" active":""),text:b.name});
+    t.addEventListener("click",()=>{ STATE.active=id; renderTabs(); renderPanel(); });
+    tabs.appendChild(t);
+  });
+  const wrap = el("div",{class:"addwrap"});
+  const btn  = el("button",{class:"addbtn",text:"＋ Add barn"});
+  const menu = el("div",{class:"addmenu"},[el("div",{class:"mhdr",text:"Add a barn"})]);
+  BARN_TYPES.forEach(tp=>{
+    const mi = el("button",{class:"mi",text:tp.label});
+    mi.addEventListener("click",(e)=>{ e.stopPropagation(); menu.classList.remove("open"); addInstance(tp.key); });
+    menu.appendChild(mi);
+  });
+  btn.addEventListener("click",(e)=>{ e.stopPropagation();
+    const open=menu.classList.contains("open");
+    document.querySelectorAll(".addmenu.open").forEach(m=>m.classList.remove("open"));
+    if(!open) menu.classList.add("open");
+  });
+  wrap.appendChild(btn); wrap.appendChild(menu); tabs.appendChild(wrap);
+}
+
+function renderPanel(){
+  const key = STATE.active;
+  const barn = STATE.barns[key];
+  const panel = $("#panel"); panel.innerHTML="";
+
+  panel.appendChild(el("h2",{text:titleFor(barn)}));
+  panel.appendChild(el("div",{class:"barnsub",text:subLine()}));
+  panel.appendChild(el("div",{class:"barnctl"},[
+    el("button",{text:"✎ Rename tab", onclick:renameActive}),
+    el("button",{text:"⧉ Duplicate", onclick:duplicateActive}),
+    el("button",{class:"danger", text:"🗑 Remove barn", onclick:removeActive})
+  ]));
+
+  // Location / Notes table
+  panel.appendChild(el("div",{class:"tablehdr"},[
+    el("h3",{text:"Wall observations"}),
+    el("span",{class:"spacer"}),
+    el("span",{class:"count",id:"rowCount"})
+  ]));
+  panel.appendChild(el("div",{class:"rowhead"},[
+    el("div",{text:"Location"}), el("div",{class:"rh-notes",text:"Notes"}), el("div",{})
+  ]));
+
+  const rowsWrap = el("div",{class:"rows",id:"rowsWrap"});
+  panel.appendChild(rowsWrap);
+  barn.rows.forEach(r=> rowsWrap.appendChild(buildRowEl(barn, r)));
+
+  panel.appendChild(el("div",{class:"footnote"},[
+    el("span",{text:"➕ The standard wall checkpoints are pre-listed — pick each reading from the Notes dropdown. Delete any that don’t apply (×), edit a Location, or use the blank row at the bottom to add more."})
+  ]));
+
+  // Per-barn fields: rebound hammer test + general notes
+  const fields = el("div",{class:"barnfields"});
+
+  const rb = el("div",{class:"bfield"});
+  rb.appendChild(el("label",{},["Rebound hammer test ", el("span",{class:"sub",text:"(result)"})]));
+  const rbIn = el("input",{class:"rebound",type:"text",placeholder:"e.g. 6,000 psi  —  or  N.A. concrete covered with protective board"});
+  rbIn.value = barn.rebound;
+  rbIn.addEventListener("input",()=>{ barn.rebound=rbIn.value; autosave(); });
+  rb.appendChild(rbIn);
+  fields.appendChild(rb);
+
+  const gn = el("div",{class:"bfield"});
+  gn.appendChild(el("label",{},["General notes ", el("span",{class:"sub",text:"(optional)"})]));
+  const gnIn = el("textarea",{class:"general",placeholder:"Any barn-wide observations…"});
+  gnIn.value = barn.general;
+  gnIn.addEventListener("input",()=>{ barn.general=gnIn.value; autosave(); });
+  gn.appendChild(gnIn);
+  fields.appendChild(gn);
+
+  panel.appendChild(fields);
+  updateRowCount();
+}
+
+// Notes is a dropdown of the standard plumb/level readings. Any value not in
+// NOTES_OPTIONS (e.g. from an older saved file) is preserved as an extra option.
+function buildNotesSelect(r){
+  const sel = el("select",{class:"notes"+(r.notes?"":" unset")});
+  sel.appendChild(el("option",{value:"",text:"—"}));
+  const opts = NOTES_OPTIONS.slice();
+  if (r.notes && !opts.includes(r.notes)) opts.push(r.notes);
+  opts.forEach(v=> sel.appendChild(el("option",{value:v,text:v})));
+  sel.value = r.notes || "";
+  return sel;
+}
+
+function buildRowEl(barn, r){
+  const loc = el("input",{class:"loc",type:"text",placeholder:"e.g. North East Corner",value:r.location,list:"locOptions",autocomplete:"off"});
+  const notes = buildNotesSelect(r);
+  const del = el("button",{class:"del",title:"Remove this row",text:"×"});
+  const row = el("div",{class:"trow"},[loc, notes, del]);
+
+  const refresh = ()=>{
+    row.classList.toggle("filled", !rowEmpty(r));
+    row.classList.toggle("empty", rowEmpty(r));
+  };
+  const onEdit = ()=>{
+    r.location = loc.value; r.notes = notes.value;
+    notes.classList.toggle("unset", !notes.value);
+    const rows = barn.rows;
+    if (r===rows[rows.length-1] && !rowEmpty(r)){
+      const nr = newRow(); rows.push(nr);
+      $("#rowsWrap").appendChild(buildRowEl(barn, nr));
+    }
+    refresh(); updateRowCount(); autosave();
+  };
+  loc.addEventListener("input", onEdit);
+  notes.addEventListener("change", onEdit);
+
+  del.addEventListener("click", ()=>{
+    const rows = barn.rows;
+    const i = rows.indexOf(r);
+    if (i>-1) rows.splice(i,1);
+    row.remove();
+    ensureTrailingEmpty(STATE.active);
+    if (barn.rows.length > $("#rowsWrap").children.length) renderPanel();
+    updateRowCount(); autosave();
+  });
+
+  refresh();
+  return row;
+}
+function updateRowCount(){
+  const c = $("#rowCount"); if(!c) return;
+  const n = STATE.barns[STATE.active].rows.filter(r=>!rowEmpty(r)).length;
+  c.textContent = n===1 ? "1 entry" : n+" entries";
+}
+
+/* ================================================================== *
+ *  SAVE / LOAD  — saves a self-contained HTML you can reopen anywhere
+ *  (tap the saved file to pick up exactly where you left off — works
+ *   offline on iPad, no separate import step needed)
+ * ================================================================== */
+function downloadBlob(filename, blob){
+  const a=document.createElement("a"), url=URL.createObjectURL(blob);
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},120);
+}
+async function shareOrDownload(filename, blob, mime){
+  try{
+    const file=new File([blob], filename, {type:mime});
+    if (navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file], title:filename});
+      return "shared";
+    }
+  }catch(e){ if(e && e.name==="AbortError") return "abort"; }
+  downloadBlob(filename, blob);
+  return "download";
+}
+function buildSelfContainedHtml(){
+  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify(serialize()))));
+  const tag = '<div id="ewallSaved" hidden>'+b64+'</div>\n';
+  const i = PRISTINE_HTML.lastIndexOf("</body>");
+  return i<0 ? PRISTINE_HTML+tag : PRISTINE_HTML.slice(0,i)+tag+PRISTINE_HTML.slice(i);
+}
+async function saveFile(){
+  const fn = "Exterior Wall Notes" + (STATE.site? " - "+safeName(STATE.site):"") + ".html";
+  const how = await shareOrDownload(fn, new Blob([buildSelfContainedHtml()],{type:"text/html"}), "text/html");
+  if (how==="shared")        toast("Choose “Save to Files” to keep it");
+  else if (how==="download") toast("Saved "+fn+" — reopen it to resume");
+}
+function openFileDialog(){ $("#fileInput").value=""; $("#fileInput").click(); }
+function handleFile(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const text=reader.result; let data;
+      if (/^\s*\{/.test(text)) data=JSON.parse(text);
+      else{
+        // Parse the saved page as a DOM and read the real #ewallSaved element.
+        // (A regex on raw text would match the literal id="ewallSaved" that
+        //  appears inside this script's own source before the actual data div.)
+        const node=new DOMParser().parseFromString(text,"text/html").getElementById("ewallSaved");
+        if(!node || !node.textContent.trim()) throw new Error("No saved Exterior Wall Notes found in that file");
+        data=JSON.parse(decodeURIComponent(escape(atob(node.textContent.trim()))));
+      }
+      if (!data || !data.order) throw new Error("Not an Exterior Wall Notes file");
+      deserialize(data); showForm(); toast("Loaded "+file.name);
+    }catch(e){ alert("Could not open that file:\n"+e.message); }
+  };
+  reader.readAsText(file);
+}
+
+/* ================================================================== *
+ *  PRINT  (clean report of every barn)
+ * ================================================================== */
+function buildPrint(){
+  const root=$("#printArea"); root.innerHTML="";
+  const head=el("div",{class:"phead"});
+  head.appendChild(el("h1",{text:"Exterior Wall Notes"}));
+  head.appendChild(el("div",{class:"pmeta",text:subLine()}));
+  root.appendChild(head);
+
+  STATE.order.forEach(id=>{
+    const barn=STATE.barns[id];
+    const sec=el("div",{class:"pbarn"});
+    sec.appendChild(el("h2",{text:titleFor(barn)}));
+
+    const rows=barn.rows.filter(r=>!rowEmpty(r));
+    const tbl=el("table",{class:"ptab"});
+    tbl.appendChild(el("tr",{},[el("th",{class:"lcol",text:"Location"}),el("th",{text:"Notes"})]));
+    if (rows.length===0) tbl.appendChild(el("tr",{},[el("td",{class:"lcol",text:"—"}),el("td",{text:"(no entries)"})]));
+    rows.forEach(r=> tbl.appendChild(el("tr",{},[el("td",{class:"lcol",text:r.location}),el("td",{text:r.notes})])));
+    sec.appendChild(tbl);
+
+    (barn.general||"").split(/\r?\n/).map(s=>s.trim()).filter(Boolean).forEach(line=>{
+      sec.appendChild(el("div",{class:"pline",text:line}));
+    });
+    if ((barn.rebound||"").trim()){
+      const ln=el("div",{class:"pline"});
+      ln.appendChild(el("b",{text:"Rebound hammer test = "}));
+      ln.appendChild(document.createTextNode(barn.rebound.trim()));
+      sec.appendChild(ln);
+    }
+    root.appendChild(sec);
+  });
+}
+function printReport(){ buildPrint(); window.print(); }
+
+/* ================================================================== *
+ *  EXCEL EXPORT  (real .xlsx, single stacked "Exterior Notes" sheet,
+ *  no libraries — matches the layout of the original workbook)
+ * ================================================================== */
+const CRC_TABLE=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?(0xEDB88320^(c>>>1)):(c>>>1);t[n]=c>>>0;}return t;})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC_TABLE[(c^b[i])&0xFF]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function zipStore(files){
+  const enc=new TextEncoder();
+  const u16=n=>[n&0xFF,(n>>>8)&0xFF];
+  const u32=n=>[n&0xFF,(n>>>8)&0xFF,(n>>>16)&0xFF,(n>>>24)&0xFF];
+  const parts=[], central=[]; let offset=0;
+  for(const f of files){
+    const name=enc.encode(f.name), data=f.data, crc=crc32(data);
+    const lh=new Uint8Array([].concat(u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),
+      u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0)));
+    parts.push(lh,name,data);
+    central.push({rec:new Uint8Array([].concat(u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),
+      u32(crc),u32(data.length),u32(data.length),u16(name.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset))),name});
+    offset+=lh.length+name.length+data.length;
+  }
+  const cdStart=offset; let cdSize=0;
+  for(const c of central){ parts.push(c.rec,c.name); cdSize+=c.rec.length+c.name.length; }
+  parts.push(new Uint8Array([].concat(u32(0x06054b50),u16(0),u16(0),u16(central.length),u16(central.length),
+    u32(cdSize),u32(cdStart),u16(0))));
+  let total=0; for(const p of parts) total+=p.length;
+  const out=new Uint8Array(total); let pos=0;
+  for(const p of parts){ out.set(p,pos); pos+=p.length; }
+  return out;
+}
+const xesc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+const enc=new TextEncoder();
+const part=(name,str)=>({name,data:enc.encode(str)});
+function cell(ref,s,text){
+  return `<c r="${ref}"${s!=null?` s="${s}"`:""} t="inlineStr"><is><t xml:space="preserve">${xesc(text)}</t></is></c>`;
+}
+const STYLES_XML =
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<fonts count="3"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="14"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>
+<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFD9E1F2"/><bgColor indexed="64"/></patternFill></fill></fills>
+<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color indexed="64"/></left><right style="thin"><color indexed="64"/></right><top style="thin"><color indexed="64"/></top><bottom style="thin"><color indexed="64"/></bottom><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="5">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+<xf numFmtId="0" fontId="2" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="left" vertical="center"/></xf>
+<xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+
+// One worksheet holding every barn, stacked (matches the original file).
+function buildCombinedSheet(){
+  const rowsXml=[], merges=[]; let r=0;
+  const push=(cells)=>{ r++; rowsXml.push(`<row r="${r}">${cells}</row>`); return r; };
+  const full=(s,text)=>{ const rr=push(cell(`A${r+1}`,s,text)); merges.push(`A${rr}:B${rr}`); return rr; };
+  const blank=()=>push("");
+
+  if (subLine()) { full(4, subLine()); blank(); }     // site · date · recorded-by header
+
+  STATE.order.forEach(id=>{
+    const b=STATE.barns[id];
+    full(1, titleFor(b));                              // "Exterior Wall Notes for X"
+    blank();
+    push(cell(`A${r+1}`,2,"Location")+cell(`B${r+1}`,2,"Notes"));   // header
+    const data=b.rows.filter(x=>!rowEmpty(x));
+    if (data.length===0) push(cell(`A${r+1}`,3,"")+cell(`B${r+1}`,3,""));
+    data.forEach(x=> push(cell(`A${r+1}`,3,x.location)+cell(`B${r+1}`,3,x.notes)));
+    (b.general||"").split(/\r?\n/).map(s=>s.trim()).filter(Boolean).forEach(line=> full(0, line));
+    if ((b.rebound||"").trim()) full(4, "Rebound hammer test = "+b.rebound.trim());
+    blank();
+  });
+
+  const mc = merges.length? `<mergeCells count="${merges.length}">${merges.map(m=>`<mergeCell ref="${m}"/>`).join("")}</mergeCells>`:"";
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="1" width="20" customWidth="1"/><col min="2" max="2" width="58" customWidth="1"/></cols><sheetData>${rowsXml.join("")}</sheetData>${mc}</worksheet>`;
+}
+
+function exportXlsx(){
+  const files=[];
+  files.push(part("xl/worksheets/sheet1.xml", buildCombinedSheet()));
+  files.push(part("xl/styles.xml", STYLES_XML));
+  files.push(part("xl/workbook.xml",
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Exterior Notes" sheetId="1" r:id="rId1"/></sheets></workbook>`));
+  files.push(part("xl/_rels/workbook.xml.rels",
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`));
+  files.push(part("[Content_Types].xml",
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>`));
+  files.push(part("_rels/.rels",
+`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>`));
+
+  const zip = zipStore(files);
+  const fn = "Exterior Wall Notes" + (STATE.site? " - "+safeName(STATE.site):"") + ".xlsx";
+  shareOrDownload(fn, new Blob([zip],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),
+                  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  toast("Exported "+fn);
+  return zip;
+}
+
+/* ================================================================== *
+ *  WIRE-UP
+ * ================================================================== */
+function capturePristine(){
+  const root=document.documentElement.cloneNode(true);
+  const s=root.querySelector("#ewallSaved"); if(s) s.remove();
+  PRISTINE_HTML = "<!DOCTYPE html>\n"+root.outerHTML;
+}
+
+function init(){
+  const dl=$("#locOptions"); if(dl) DEFAULT_LOCATIONS.forEach(v=>dl.appendChild(el("option",{value:v})));
+  capturePristine();
+  buildSetup();
+  $("#startBtn").addEventListener("click", startFromSetup);
+  $("#loadFileBtn").addEventListener("click", openFileDialog);
+  $("#setupBtn").addEventListener("click", showSetup);
+  $("#saveBtn").addEventListener("click", saveFile);
+  $("#openBtn").addEventListener("click", openFileDialog);
+  $("#printBtn").addEventListener("click", printReport);
+  $("#xlsxBtn").addEventListener("click", ()=>exportXlsx());
+  $("#fileInput").addEventListener("change", e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); });
+  document.addEventListener("click",()=>document.querySelectorAll(".addmenu.open").forEach(m=>m.classList.remove("open")));
+
+  // When served over http(s) with a sibling sw.js, register it for offline use.
+  // No-op when opened straight from Files (protocol is file:), so nothing breaks there.
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http")===0){
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
+
+  window.__ewall = { STATE:()=>STATE, exportXlsx, serialize, deserialize, startFromSetup,
+                     showForm, buildPrint, addInstance, duplicateActive, saveFile, buildSelfContainedHtml };
+
+  // If this file was saved with notes embedded, restore them and jump to the form.
+  const embedded=document.getElementById("ewallSaved");
+  if (embedded && embedded.textContent.trim()){
+    try{
+      const data=JSON.parse(decodeURIComponent(escape(atob(embedded.textContent.trim()))));
+      if (data && data.order){ deserialize(data); showForm(); return; }
+    }catch(e){/* fall through to normal start */}
+  }
+
+  // Otherwise, offer to resume the last autosaved session.
+  try{
+    const raw=localStorage.getItem(AUTOSAVE_KEY);
+    if (raw){
+      const data=JSON.parse(raw);
+      if (data && data.order && data.order.length){
+        const names=data.order.map(id=>{ const b=data.barns&&data.barns[id]; return (b&&b.name) || (BTYPE[id]?BTYPE[id].label:id); }).join(", ");
+        $("#resumeMeta").textContent =
+          (data.site?("Site "+data.site+" · "):"") + names +
+          (data.savedAt?(" · "+new Date(data.savedAt).toLocaleString()):"");
+        $("#resumeBox").style.display="block";
+        $("#resumeBtn").addEventListener("click",()=>{ deserialize(data); showForm(); });
+        $("#resumeDiscard").addEventListener("click",()=>{ localStorage.removeItem(AUTOSAVE_KEY); $("#resumeBox").style.display="none"; });
+      }
+    }
+  }catch(e){/* ignore */}
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
