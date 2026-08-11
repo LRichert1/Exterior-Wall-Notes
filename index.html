@@ -193,6 +193,118 @@
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+  /* ---------- Site map + footprint pins ---------- */
+  .mapsec{margin:20px 0 4px;border-top:1px solid var(--line);padding-top:16px}
+  .maphdr{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .maphdr h3{margin:0;font-size:16px}
+  .maphdr .spacer{flex:1}
+  .maphdr .stat{color:var(--muted);font-size:12.5px}
+  .mapctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .mapctl button{
+    border:1px solid var(--line);background:#fff;color:var(--muted);font-size:12.5px;font-weight:600;
+    padding:5px 11px;border-radius:7px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;
+  }
+  .mapctl button:hover{background:#f3f6f9;color:var(--ink)}
+  .mapctl button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .mapctl button.danger:hover{background:var(--danger-bg);color:var(--danger);border-color:#f3c0bb}
+  .mapctl select{
+    padding:5px 8px;border:1px solid var(--line);border-radius:7px;background:#fff;
+    font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer;
+  }
+
+  .mapdrop{
+    border:2px dashed var(--line-strong);border-radius:var(--radius);background:#fbfcfd;
+    padding:26px 20px;text-align:center;color:var(--muted);
+  }
+  .mapdrop .big{font-size:30px;line-height:1;margin-bottom:8px}
+  .mapdrop .t{font-weight:600;color:var(--ink);margin-bottom:3px}
+  .mapdrop .s{font-size:12.5px;margin-bottom:14px}
+
+  /* stage holds the image; pins + trace handles are positioned in % over it */
+  .mapstage{position:relative;display:block;width:100%;line-height:0;
+    border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:#eef2f5;
+    touch-action:none}
+  .mapstage img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+  /* zoomed variant: the img is oversized and offset so one barn fills the frame */
+  .mapstage.zoom img{position:absolute;width:auto;height:auto;max-width:none}
+
+  /* --- setup: trace the barns onto the map --- */
+  .tracebox{position:absolute;border:2px solid var(--accent);background:rgba(47,128,184,.14);
+    cursor:pointer;box-sizing:border-box}
+  .tracebox.sel{border-color:#ffb300;background:rgba(255,179,0,.18);border-width:3px}
+  .tracebox.round{border-radius:50%}
+  .handle.mid{width:26px;height:26px;background:var(--brand)}
+  /* top-centre keeps the label clear of all four corner drag handles */
+  .tracebox .tag{
+    position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+    background:var(--accent);color:#fff;
+    font-size:11px;font-weight:700;line-height:1;padding:3px 7px;border-radius:0 0 5px 5px;white-space:nowrap;
+  }
+  .tracebox.sel .tag{background:#e69500}
+  .newbox{position:absolute;border:2px dashed var(--brand);background:rgba(31,78,121,.12);pointer-events:none}
+
+  .tlist{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+  .trowb{display:grid;grid-template-columns:34px 1fr 150px 34px;gap:9px;align-items:center;
+    border:1px solid var(--line-strong);border-radius:9px;padding:7px 10px;background:#fff;cursor:pointer}
+  .trowb.sel{border-color:#e69500;box-shadow:inset 0 0 0 1px #e69500;background:#fffaf0}
+  .trowb .num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;
+    font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+  .trowb.sel .num{background:#e69500}
+  .trowb input,.trowb select{padding:7px 9px;border:1px solid var(--line-strong);border-radius:7px;
+    background:#fff;font-size:14px;width:100%}
+  .trowb .rm{border:1px solid transparent;background:transparent;color:var(--muted);cursor:pointer;
+    width:30px;height:32px;border-radius:7px;font-size:17px;line-height:1}
+  .trowb .rm:hover{background:var(--danger-bg);color:var(--danger);border-color:#f3c0bb}
+  .tempty{color:var(--muted);font-size:13px;padding:10px 2px}
+
+  /* --- tap a corner -> pick the reading right there --- */
+  .pickwrap{position:fixed;inset:0;z-index:60}
+  .pickmenu{
+    position:fixed;background:#fff;border:1px solid var(--line-strong);border-radius:10px;
+    box-shadow:0 10px 30px rgba(16,24,40,.26);padding:7px;min-width:200px;max-height:70vh;overflow:auto;
+  }
+  .pickmenu .ph{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.4px;padding:5px 10px 8px;border-bottom:1px solid var(--line);margin-bottom:5px}
+  .pickmenu button{display:block;width:100%;text-align:left;border:none;background:transparent;
+    padding:11px 12px;border-radius:7px;cursor:pointer;font-size:15px;color:var(--ink);font-weight:600}
+  .pickmenu button:hover{background:var(--brand-50)}
+  .pickmenu button.cur{background:var(--brand);color:#fff}
+  .pickmenu button.clear{color:var(--danger);font-weight:600}
+  .mapstage svg.trace{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .mapstage svg.trace polygon,
+  .mapstage svg.trace ellipse{fill:rgba(47,128,184,.16);stroke:var(--accent);stroke-width:2;vector-effect:non-scaling-stroke}
+  /* free-mark structures: the outline is the tap target */
+  .mapstage.free{cursor:crosshair}
+
+  .pin{
+    position:absolute;transform:translate(-50%,-50%);
+    width:30px;height:30px;border-radius:50%;border:2px solid #fff;
+    background:var(--brand);color:#fff;font-size:12px;font-weight:700;line-height:1;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;
+    box-shadow:0 1px 4px rgba(0,0,0,.4);touch-action:manipulation;
+  }
+  .pin:hover{background:var(--brand-700)}
+  .pin.done{background:var(--ok)}
+  .pin.sel{outline:3px solid #ffd54f;outline-offset:1px}
+  .pin .lbl{
+    position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+    background:rgba(31,41,51,.92);color:#fff;font-size:11px;font-weight:600;
+    padding:3px 7px;border-radius:5px;white-space:nowrap;display:none;pointer-events:none;
+  }
+  .pin:hover .lbl,.pin.sel .lbl{display:block}
+
+  .handle{
+    position:absolute;transform:translate(-50%,-50%);
+    width:34px;height:34px;border-radius:50%;border:3px solid #fff;background:var(--accent);
+    cursor:grab;touch-action:none;box-shadow:0 1px 5px rgba(0,0,0,.45);
+  }
+  .handle:active{cursor:grabbing;background:var(--brand)}
+  .tracetip{
+    background:var(--brand-50);border:1px solid var(--brand);border-radius:8px;
+    padding:9px 13px;font-size:13px;color:var(--brand-700);margin-bottom:10px;
+  }
+  .trow.hit input.loc{border-color:var(--ok);box-shadow:0 0 0 2px rgba(46,125,50,.18)}
+
   /* ---------- Print report ---------- */
   #printArea{display:none}
   @media print{
@@ -258,10 +370,17 @@
     </div>
 
     <div class="field">
+      <label>Site map <span class="hint">(upload once — then trace and label each barn on it)</span></label>
+      <div id="mapSetup"></div>
+    </div>
+
+    <!-- With a map, the barns are whatever you traced. Without one, fall back
+         to the per-type counts. Only one of these two is ever visible. -->
+    <div class="field" id="qtyField">
       <label>Which barns are at this site, and how many? <span class="hint">(set a count for each)</span></label>
       <div class="qtylist" id="barnList"></div>
     </div>
-    <div class="setup-note">Tip: you can still add, duplicate, rename or remove barns once you’re in the form.</div>
+    <div class="setup-note" id="qtyNote">Tip: you can still add, duplicate, rename or remove barns once you’re in the form.</div>
 
     <div class="setup-actions">
       <button class="btn" id="loadFileBtn">📂 Open saved file…</button>
@@ -279,6 +398,7 @@
     <button class="btn sm" id="saveBtn">💾 Save file</button>
     <button class="btn sm" id="openBtn">📂 Open</button>
     <button class="btn sm" id="printBtn">🖨 Print</button>
+    <button class="btn sm" id="mapPdfBtn">🗺 Map PDF</button>
     <button class="btn sm primary" id="xlsxBtn">⬇ Export to Excel</button>
   </div>
 
@@ -295,6 +415,9 @@
 <!-- hidden file input for loading -->
 <input type="file" id="fileInput" accept=".html,.json,text/html,application/json" style="display:none">
 
+<!-- hidden file input for the site map image (iPad offers Photo Library / Take Photo / Files) -->
+<input type="file" id="mapInput" accept="image/*" style="display:none">
+
 <script>
 "use strict";
 
@@ -304,15 +427,28 @@
  *  (matches the original workbook: "Exterior Wall Notes for Breeding",
  *   "...for Gestation", "...for Isolation Barn", etc.)
  * ------------------------------------------------------------------ */
+/*  shape : "rect" (default) traces a box, "circle" traces a circle.
+ *  pins  : "preset" (default) pre-lists the 8 standard corner checkpoints,
+ *          "free" starts empty and you tap anywhere along the outline to
+ *          drop a reading — manure tanks and cisterns have no meaningful
+ *          "northeast corner", so their points are placed as found.        */
 const BARN_TYPES = [
   {key:"Gestation", label:"Gestation"},
   {key:"Farrowing", label:"Farrowing"},
   {key:"Breeding",  label:"Breeding"},
   {key:"GDU",       label:"GDU"},
   {key:"Isolation", label:"Isolation Barn"},
+  {key:"Other",     label:"Other barn"},
+  {key:"Cistern",   label:"Cistern",    pins:"free", noun:"cistern"},
+  {key:"Tank",      label:"Round tank", pins:"free", shape:"circle", noun:"tank"},
 ];
 const BTYPE = Object.fromEntries(BARN_TYPES.map(b=>[b.key,b]));
 const typeRank = k => BARN_TYPES.findIndex(b=>b.key===k);
+const shapeOf  = k => (BTYPE[k] && BTYPE[k].shape) || "rect";
+const isFree   = k => !!(BTYPE[k] && BTYPE[k].pins==="free");
+// "barn" reads wrong on a manure tank — label the UI by what it actually is.
+const nounOf   = k => (BTYPE[k] && BTYPE[k].noun) || "barn";
+const Noun     = k => { const n=nounOf(k); return n[0].toUpperCase()+n.slice(1); };
 const AUTOSAVE_KEY = "ewallNotes.autosave.v1";
 
 /* ------------------------------------------------------------------ *
@@ -320,10 +456,20 @@ const AUTOSAVE_KEY = "ewallNotes.autosave.v1";
  *  has {type, name, rebound, general, rows}.  A site can hold several
  *  of one type (e.g. two Gestation barns -> "Gestation 1"/"Gestation 2").
  * ------------------------------------------------------------------ */
-let STATE = { site:"", date:"", inspector:"", order:[], barns:{}, active:null };
+// STATE.map is the ONE site map shared by every barn: {src (downscaled JPEG
+// data URL), w, h}. Each barn keeps its own traced footprint in barn.foot =
+// {quad:[{x,y}x4] normalized 0..1 over the image, north: 0|90|180|270}, from
+// which the 8 labeled pins are derived. null foot = not traced yet.
+let STATE = { site:"", date:"", inspector:"", order:[], barns:{}, active:null, map:null };
 let PRISTINE_HTML = "";           // clean copy of this page, captured at load, used for "Save"
 let _rid = 1, _bid = 1;
-const newRow = (location="",notes="")=>({id:_rid++, location, notes});
+// x,y (normalized map coords) are set only on free-placed marks — a row that
+// carries them draws as a tappable point on that structure's outline.
+const newRow = (location="",notes="",x,y)=>{
+  const r={id:_rid++, location, notes};
+  if (x!==undefined && x!==null){ r.x=x; r.y=y; }
+  return r;
+};
 const newId  = ()=>"b"+(_bid++);
 // Standard exterior-wall checkpoints, pre-listed in each barn so the field
 // inspector only fills in the reading. Clockwise: each corner with its two
@@ -338,10 +484,104 @@ const DEFAULT_LOCATIONS = [
   "Northwest corner – West side",
   "Northwest corner – North side",
 ];
-// Fixed set of plumb/level readings offered in the Notes dropdown.
-const NOTES_OPTIONS = ['level','1/4" top in','1/4" top out','1/8" top in','1/8" top out','1/2" top in','1/2" top out'];
-const makeBarn = (type,name)=>({type, name, rebound:"", general:"",
-  rows:[ ...DEFAULT_LOCATIONS.map(loc=>newRow(loc)), newRow() ]});
+// Fixed set of plumb/level readings offered in the Notes dropdown: "level",
+// then each size paired top in / top out, ascending. Readings from older saved
+// files that aren't in this list (e.g. the 1/8" pair) are still preserved by
+// buildNotesSelect, which appends any unrecognized value as an extra option.
+const NOTES_OPTIONS = ['level',
+  '1/4" top in','1/4" top out',
+  '1/2" top in','1/2" top out',
+  '3/4" top in','3/4" top out',
+  '1" top in','1" top out'];
+// Free-pin structures (tanks, cisterns) start empty — their readings are
+// placed on the outline in the field, not pre-listed.
+const makeBarn = (type,name)=>({type, name, rebound:"", general:"", foot:null,
+  rows: isFree(type) ? [ newRow() ]
+                     : [ ...DEFAULT_LOCATIONS.map(loc=>newRow(loc)), newRow() ]});
+
+/* ------------------------------------------------------------------ *
+ *  Site map geometry.
+ *
+ *  The inspector drags a 4-corner box over the barn on the site map and
+ *  says which way north points. From that we work out, purely from the
+ *  geometry, which edge is the north/east/south/west wall and which
+ *  corner is NE/SE/SW/NW — so nobody has to reason about compass
+ *  direction while walking the building. Each of the 8 pins is one
+ *  corner paired with one of its two adjacent walls, which is exactly
+ *  the DEFAULT_LOCATIONS vocabulary.
+ * ------------------------------------------------------------------ */
+const NORTH_CHOICES = [{v:0,t:"↑ up"},{v:90,t:"→ right"},{v:180,t:"↓ down"},{v:270,t:"← left"}];
+const COMPASS = ["North","East","South","West"];          // index = bearing/90
+const DEFAULT_QUAD = [{x:.22,y:.24},{x:.78,y:.24},{x:.78,y:.76},{x:.22,y:.76}];
+const cloneQuad = q => q.map(p=>({x:p.x,y:p.y}));
+
+// Screen bearing of a vector, in degrees clockwise from "up" (y grows down).
+const bearingOf = (dx,dy) => (Math.atan2(dx,-dy)*180/Math.PI + 360) % 360;
+const angDist = (a,b) => { const d=Math.abs(((a-b)%360+360)%360); return d>180?360-d:d; };
+
+// Assign each of the 4 edges a distinct compass index, best fit first, so a
+// rotated or slightly skewed footprint still yields one N, one E, one S, one W.
+function edgeDirections(quad, north){
+  const bear = [];
+  for (let i=0;i<4;i++){
+    const a=quad[i], b=quad[(i+1)%4];
+    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+    const c={x:(quad[0].x+quad[1].x+quad[2].x+quad[3].x)/4,
+             y:(quad[0].y+quad[1].y+quad[2].y+quad[3].y)/4};
+    // outward normal = midpoint pushed away from the centroid
+    bear.push((bearingOf(mx-c.x, my-c.y) - north + 360) % 360);
+  }
+  const cand=[];
+  for (let e=0;e<4;e++) for (let d=0;d<4;d++) cand.push({e,d,err:angDist(bear[e], d*90)});
+  cand.sort((p,q)=>p.err-q.err);
+  const dirOf=new Array(4).fill(-1), usedD=new Set(), usedE=new Set();
+  for (const c of cand){
+    if (usedE.has(c.e)||usedD.has(c.d)) continue;
+    dirOf[c.e]=c.d; usedE.add(c.e); usedD.add(c.d);
+  }
+  return dirOf;   // dirOf[edgeIndex] = compass index
+}
+
+// North is a property of the MAP (one image, one orientation), not of each barn.
+const mapNorth = ()=> (STATE.map && STATE.map.north) || 0;
+
+// The 8 pins, in DEFAULT_LOCATIONS order where possible.
+function computePins(foot, north){
+  if (!foot || !foot.quad) return [];        // circles have no corners
+  if (north===undefined) north=mapNorth();
+  const q=foot.quad, dirOf=edgeDirections(q, north), pins=[];
+  for (let corner=0; corner<4; corner++){
+    const prev=(corner+3)%4;                       // edge arriving at this corner
+    const next=corner;                             // edge leaving this corner
+    const dirs=[dirOf[prev], dirOf[next]];
+    const ns=dirs.find(d=>d===0||d===2), ew=dirs.find(d=>d===1||d===3);
+    if (ns===undefined || ew===undefined) continue;             // 45°-ish, skip
+    const cname=COMPASS[ns]+COMPASS[ew].toLowerCase();          // "Northeast"
+    [prev,next].forEach(e=>{
+      const a=q[e], b=q[(e+1)%4];
+      // sit the pin ~20% along the wall, measured from this corner
+      const from = (e===next) ? a : b, to = (e===next) ? b : a;
+      pins.push({
+        location: cname+" corner – "+COMPASS[dirOf[e]]+" side",
+        x: from.x + (to.x-from.x)*0.2,
+        y: from.y + (to.y-from.y)*0.2
+      });
+    });
+  }
+  const rank = l => { const i=DEFAULT_LOCATIONS.indexOf(l); return i<0?99:i; };
+  pins.sort((a,b)=>rank(a.location)-rank(b.location));
+  return pins;
+}
+
+// The pins to draw for a structure: derived corners for barns, or the
+// free-placed marks (rows carrying x,y) for tanks and cisterns.
+function pinsFor(barn){
+  if (!barn.foot) return [];
+  if (isFree(barn.type))
+    return barn.rows.filter(r=>r.x!==undefined && r.x!==null)
+                    .map(r=>({location:r.location, x:r.x, y:r.y, row:r}));
+  return computePins(barn.foot);
+}
 
 /* ------------------------------------------------------------------ *
  *  Small helpers
@@ -397,31 +637,51 @@ function autosave(){
 }
 function serialize(){
   return {
-    version:1, savedAt:new Date().toISOString(),
+    // v3: north moved from each barn's foot onto the shared map
+    version:3, savedAt:new Date().toISOString(),
     site:STATE.site, date:STATE.date, inspector:STATE.inspector, order:STATE.order.slice(),
+    map:STATE.map,                                   // shared site map (downscaled JPEG data URL)
     barns:Object.fromEntries(STATE.order.map(id=>{
       const b=STATE.barns[id];
       return [id,{
         type:b.type, name:b.name, rebound:b.rebound, general:b.general,
-        rows:b.rows.filter(r=>!rowEmpty(r)).map(r=>({location:r.location, notes:r.notes}))
+        foot:b.foot,                                 // traced outline (quad or circle)
+        rows:b.rows.filter(r=>!rowEmpty(r)).map(r=>{
+          const o={location:r.location, notes:r.notes};
+          if (r.x!==undefined){ o.x=r.x; o.y=r.y; }  // free-placed mark
+          return o;
+        })
       }];
     }))
   };
 }
 function deserialize(data){
-  STATE = { site:data.site||"", date:data.date||"", inspector:data.inspector||"", order:[], barns:{}, active:null };
-  _bid = 1;
+  STATE = { site:data.site||"", date:data.date||"", inspector:data.inspector||"", order:[], barns:{}, active:null,
+            map:(data.map && data.map.src) ? data.map : null };   // v1 files simply have no map
+  _bid = 1; TRACE_SEL=null; SELPIN=null; ZOOMOUT=false;
+  // v2 files kept north on each barn; it now lives on the map. Take the first
+  // one we see so those files keep their orientation.
+  let legacyNorth = null;
   (data.order||[]).forEach(oldId=>{
     const b = (data.barns && data.barns[oldId]) || {};
     let type = b.type || (BTYPE[oldId] ? oldId : null);
     if (!BTYPE[type]) return;                              // skip unknown types
     const id = newId();
     const name = b.name || BTYPE[type].label;
-    const rows = (b.rows||[]).map(r=>newRow(r.location||r.truss||"", r.notes||""));
-    STATE.barns[id] = { type, name, rebound:b.rebound||"", general:b.general||"", rows };
+    const rows = (b.rows||[]).map(r=>newRow(r.location||r.truss||"", r.notes||"", r.x, r.y));
+    let foot = null;
+    if (b.foot && Array.isArray(b.foot.quad) && b.foot.quad.length===4){
+      foot = { quad:cloneQuad(b.foot.quad) };
+      if (legacyNorth===null && b.foot.north!==undefined) legacyNorth = +b.foot.north||0;
+    } else if (b.foot && b.foot.circle && typeof b.foot.circle.r==="number"){
+      const c=b.foot.circle;
+      foot = { circle:{cx:+c.cx||0, cy:+c.cy||0, r:+c.r||0.05} };
+    }
+    STATE.barns[id] = { type, name, rebound:b.rebound||"", general:b.general||"", foot, rows };
     STATE.order.push(id);
     ensureTrailingEmpty(id);
   });
+  if (STATE.map && STATE.map.north===undefined) STATE.map.north = legacyNorth||0;
   STATE.active = STATE.order[0] || null;
 }
 
@@ -459,6 +719,7 @@ function buildSetup(){
   });
   if(!$("#dateInput").value) $("#dateInput").value = todayIso();
   $("#siteInput").addEventListener("input", refreshStart);
+  renderMapSetup();
   refreshStart();
 }
 function setupCounts(){
@@ -471,13 +732,20 @@ function setupCounts(){
 }
 function totalSetupQty(){ return Object.values(setupCounts()).reduce((a,b)=>a+b,0); }
 function refreshStart(){
-  const ok = $("#siteInput").value.trim()!=="" && totalSetupQty()>0;
+  // With a map the barns come from the traced boxes; without one, from the counts.
+  const enough = STATE.map ? STATE.order.length>0 : totalSetupQty()>0;
+  const ok = $("#siteInput").value.trim()!=="" && enough;
   $("#startBtn").disabled = !ok;
+  const b=$("#startBtn");
+  if (b) b.textContent = (STATE.map && STATE.order.length)
+    ? "Open form → "+STATE.order.length+" barn"+(STATE.order.length>1?"s":"")
+    : "Open form →";
 }
 function prefillSetup(){
   $("#siteInput").value = STATE.site||"";
   $("#dateInput").value = STATE.date||todayIso();
   $("#nameInput").value = STATE.inspector||"";
+  renderMapSetup();
   const counts={};
   STATE.order.forEach(id=>{ const t=STATE.barns[id].type; counts[t]=(counts[t]||0)+1; });
   document.querySelectorAll("#barnList .qtyrow").forEach(row=>{
@@ -507,8 +775,23 @@ function renumberAll(){
 }
 function startFromSetup(){
   const site = $("#siteInput").value.trim();
+  if (!site) return;
+
+  // Map mode: the barns are whatever was traced and labeled on the map, so
+  // there is nothing to reconcile — the per-type counts don't apply at all.
+  if (STATE.map){
+    if (!STATE.order.length) return;
+    STATE.site = site;
+    STATE.date = $("#dateInput").value || "";
+    STATE.inspector = $("#nameInput").value.trim();
+    if (!STATE.active || !STATE.barns[STATE.active]) STATE.active = STATE.order[0];
+    STATE.order.forEach(ensureTrailingEmpty);
+    showForm();
+    return;
+  }
+
   const counts = setupCounts();
-  if (!site || totalSetupQty()===0) return;
+  if (totalSetupQty()===0) return;
 
   // Warn before removing any barn that already has data entered.
   const losing=[];
@@ -573,7 +856,8 @@ function duplicateActive(){
   const cur=STATE.barns[STATE.active];
   const id=newId();
   STATE.barns[id]={ type:cur.type, name:autoName(cur.type), rebound:cur.rebound, general:cur.general,
-    rows:cur.rows.filter(r=>!rowEmpty(r)).map(r=>newRow(r.location,r.notes)) };
+    foot: cur.foot ? (cur.foot.circle ? {circle:{...cur.foot.circle}} : {quad:cloneQuad(cur.foot.quad)}) : null,
+    rows:cur.rows.filter(r=>!rowEmpty(r)).map(r=>newRow(r.location,r.notes,r.x,r.y)) };
   ensureTrailingEmpty(id);
   const i=STATE.order.indexOf(STATE.active);
   STATE.order.splice(i+1,0,id); STATE.active=id;
@@ -650,8 +934,11 @@ function renderPanel(){
   panel.appendChild(el("div",{class:"barnctl"},[
     el("button",{text:"✎ Rename tab", onclick:renameActive}),
     el("button",{text:"⧉ Duplicate", onclick:duplicateActive}),
-    el("button",{class:"danger", text:"🗑 Remove barn", onclick:removeActive})
+    el("button",{class:"danger", text:"🗑 Remove "+nounOf(barn.type), onclick:removeActive})
   ]));
+
+  // This barn, zoomed on the site map — tapping a corner records its reading.
+  panel.appendChild(buildMapSection(barn));
 
   // Location / Notes table
   panel.appendChild(el("div",{class:"tablehdr"},[
@@ -749,6 +1036,550 @@ function updateRowCount(){
 }
 
 /* ================================================================== *
+ *  SITE MAP
+ *
+ *  One image for the whole site, uploaded on the SETUP screen. There you
+ *  drag a box around each barn and label it — those boxes ARE the barns,
+ *  so the tabs come straight off the map. North is a property of the map
+ *  (one image, one orientation), and every wall label derives from it.
+ *
+ *  On the form screen each tab shows its own barn zoomed in, and tapping
+ *  a corner opens the reading picker right on the spot.
+ * ================================================================== */
+let SELPIN    = null;   // location string of the corner last tapped
+let TRACE_SEL = null;   // barn id currently selected on the setup map
+let NEW_TYPE  = "Gestation";  // what the next drag on the setup map creates
+let ZOOMOUT   = false;  // form screen: show the whole site instead of one barn
+
+function openMapDialog(){ $("#mapInput").value=""; $("#mapInput").click(); }
+
+// Photos off an iPad are 2-4 MB, and serialize() rides in localStorage on
+// every keystroke — so downscale hard before it ever reaches STATE.
+const MAP_MAX_PX = 1600, MAP_QUALITY = 0.7;
+function importMapImage(file){
+  const url=URL.createObjectURL(file), img=new Image();
+  img.onload=()=>{
+    const s=Math.min(1, MAP_MAX_PX/Math.max(img.width,img.height));
+    const w=Math.max(1,Math.round(img.width*s)), h=Math.max(1,Math.round(img.height*s));
+    const c=document.createElement("canvas"); c.width=w; c.height=h;
+    c.getContext("2d").drawImage(img,0,0,w,h);
+    URL.revokeObjectURL(url);
+    let src;
+    try{ src=c.toDataURL("image/jpeg",MAP_QUALITY); }
+    catch(e){ alert("Could not read that image:\n"+e.message); return; }
+    STATE.map={ src, w, h, north:(STATE.map&&STATE.map.north)||0 };
+    const kb=Math.round(src.length*0.75/1024);
+    renderMapSetup(); refreshStart(); autosave();
+    toast("Site map added ("+w+"×"+h+", ~"+kb+" KB) — drag a box around each barn");
+  };
+  img.onerror=()=>{ URL.revokeObjectURL(url); alert("That file could not be opened as an image."); };
+  img.src=url;
+}
+
+function removeMap(){
+  if (!confirm("Remove the site map?\n\nEvery barn's traced outline goes with it. The barns and their notes stay.")) return;
+  STATE.map=null; TRACE_SEL=null; SELPIN=null;
+  STATE.order.forEach(id=>{ STATE.barns[id].foot=null; });
+  renderMapSetup(); refreshStart(); autosave();
+}
+
+/* ---- footprint helpers.  Setup traces axis-aligned boxes, but they are
+   stored as 4-point quads so computePins() and the PDF work unchanged. ---- */
+const clamp01 = v => Math.min(1, Math.max(0, v));
+
+// A circle's radius is stored as a fraction of image WIDTH, so it stays a
+// circle on a non-square map; its vertical radius needs the aspect factor.
+const mapAR = ()=> (STATE.map ? STATE.map.w/STATE.map.h : 1);
+const ryOf  = r => r*mapAR();
+
+const rectOf = foot => {
+  if (foot.circle){
+    const c=foot.circle, ry=ryOf(c.r);
+    return { x0:c.cx-c.r, y0:c.cy-ry, x1:c.cx+c.r, y1:c.cy+ry };
+  }
+  const xs=foot.quad.map(p=>p.x), ys=foot.quad.map(p=>p.y);
+  return { x0:Math.min.apply(null,xs), y0:Math.min.apply(null,ys),
+           x1:Math.max.apply(null,xs), y1:Math.max.apply(null,ys) };
+};
+const quadOfRect = r => [{x:r.x0,y:r.y0},{x:r.x1,y:r.y0},{x:r.x1,y:r.y1},{x:r.x0,y:r.y1}];
+// Largest circle that fits the traced box.
+const circleOfRect = r => ({ cx:(r.x0+r.x1)/2, cy:(r.y0+r.y1)/2,
+                             r:Math.max(.01, Math.min((r.x1-r.x0)/2, (r.y1-r.y0)/2/mapAR())) });
+const ptOnCircle = (c,ang)=>({ x:c.cx + c.r*Math.sin(ang*Math.PI/180),
+                               y:c.cy - ryOf(c.r)*Math.cos(ang*Math.PI/180) });
+
+// Convert a foot between shapes when the structure's type changes.
+function reshapeFoot(foot, shape){
+  if (!foot) return null;
+  if (shape==="circle") return foot.circle ? foot : { circle:circleOfRect(rectOf(foot)) };
+  return foot.quad ? foot : { quad:quadOfRect(rectOf(foot)) };
+}
+
+/* ---- free marks: snap a tap to the outline, then name it by bearing ---- */
+const COMPASS8=["North","Northeast","East","Southeast","South","Southwest","West","Northwest"];
+
+// Nearest point on the structure's outline, plus which edge (rect only).
+function snapToOutline(barn, p){
+  const foot=barn.foot;
+  if (foot.circle){
+    const c=foot.circle;
+    const dx=p.x-c.cx, dy=(p.y-c.cy)/mapAR();
+    const ang=(dx===0&&dy===0) ? 0 : bearingOf(dx,dy);
+    const q=ptOnCircle(c,ang);
+    return { x:clamp01(q.x), y:clamp01(q.y), ang };
+  }
+  const r=rectOf(foot), cl=(v,a,b)=>Math.min(Math.max(v,a),b);
+  const cands=[
+    {x:cl(p.x,r.x0,r.x1), y:r.y0, e:0},
+    {x:r.x1, y:cl(p.y,r.y0,r.y1), e:1},
+    {x:cl(p.x,r.x0,r.x1), y:r.y1, e:2},
+    {x:r.x0, y:cl(p.y,r.y0,r.y1), e:3}
+  ];
+  let best=cands[0], bd=Infinity;
+  cands.forEach(q=>{
+    const dx=q.x-p.x, dy=(q.y-p.y)/mapAR(), d=dx*dx+dy*dy;
+    if (d<bd){ bd=d; best=q; }
+  });
+  return best;
+}
+
+// Suggested name for a freely placed mark — still free placement, but a
+// bearing-derived label beats "Point 3" in the report. Fully editable after.
+function autoMarkLabel(barn, pt){
+  let dir;
+  if (barn.foot.circle){
+    const t=((pt.ang - mapNorth())%360+360)%360;
+    dir=COMPASS8[Math.round(t/45)%8];
+  } else {
+    const dirOf=edgeDirections(quadOfRect(rectOf(barn.foot)), mapNorth());
+    dir=COMPASS[dirOf[pt.e!==undefined?pt.e:0]];
+  }
+  const base=dir+" side";
+  const used=barn.rows.filter(r=>r.location.trim()===base || r.location.trim().indexOf(base+" ")===0).length;
+  return used ? base+" "+(used+1) : base;
+}
+
+// Crop window around one barn, padded so a little context stays visible.
+function cropFor(foot, pad){
+  const r=rectOf(foot);
+  const pw=Math.max((r.x1-r.x0)*pad, .02), ph=Math.max((r.y1-r.y0)*pad, .02);
+  const x0=clamp01(r.x0-pw), y0=clamp01(r.y0-ph);
+  const x1=clamp01(r.x1+pw), y1=clamp01(r.y1+ph);
+  return { x0, y0, w:Math.max(.05,x1-x0), h:Math.max(.05,y1-y0) };
+}
+function ptOn(stage, ev){
+  const r=stage.getBoundingClientRect();
+  return { x:clamp01((ev.clientX-r.left)/r.width), y:clamp01((ev.clientY-r.top)/r.height) };
+}
+
+/* ------------------------------------------------------------------ *
+ *  SETUP SCREEN — upload the map, trace a box per barn, label them.
+ * ------------------------------------------------------------------ */
+function syncSetupMode(){
+  const has=!!STATE.map;
+  const qf=$("#qtyField"), qn=$("#qtyNote");
+  if(qf) qf.style.display = has ? "none" : "block";
+  if(qn) qn.style.display = has ? "none" : "block";
+}
+
+function addTracedBarn(rect){
+  const type=BTYPE[NEW_TYPE] ? NEW_TYPE : BARN_TYPES[0].key;
+  const name=autoName(type);
+  const id=newId();
+  STATE.barns[id]=makeBarn(type, name);
+  STATE.barns[id].foot = shapeOf(type)==="circle"
+    ? { circle:circleOfRect(rect) } : { quad:quadOfRect(rect) };
+  STATE.order.push(id);
+  TRACE_SEL=id;
+  renderMapSetup(); refreshStart(); autosave();
+}
+
+// Switching type can change both the outline shape and whether the 8 preset
+// corner rows make sense. Untouched presets are cleared; anything with data
+// entered is left alone rather than silently thrown away.
+function changeBarnType(b, next){
+  const wasFree=isFree(b.type), nowFree=isFree(next);
+  b.type=next;
+  b.foot=reshapeFoot(b.foot, shapeOf(next));
+  if (wasFree!==nowFree){
+    const untouched=b.rows.every(r=>!r.notes.trim() && r.x===undefined);
+    if (untouched) b.rows = nowFree ? [newRow()]
+                                    : [...DEFAULT_LOCATIONS.map(l=>newRow(l)), newRow()];
+  }
+}
+
+function removeTracedBarn(id){
+  const b=STATE.barns[id];
+  if (barnHasData(id) && !confirm("Remove “"+b.name+"”? Its notes will be deleted too.")) return;
+  STATE.order.splice(STATE.order.indexOf(id),1);
+  delete STATE.barns[id];
+  if (TRACE_SEL===id) TRACE_SEL=null;
+  if (STATE.active===id) STATE.active=STATE.order[0]||null;
+  renderMapSetup(); refreshStart(); autosave();
+}
+
+function renderMapSetup(){
+  const host=$("#mapSetup"); if(!host) return;
+  host.innerHTML="";
+  syncSetupMode();
+
+  if (!STATE.map){
+    host.appendChild(el("div",{class:"mapdrop"},[
+      el("div",{class:"big",text:"🗺"}),
+      el("div",{class:"t",text:"No site map yet"}),
+      el("div",{class:"s",text:"Optional — but with one you trace each barn, tank or cistern here, then tap the outline in the field instead of reading a compass."}),
+      el("button",{class:"btn primary",type:"button",text:"📷 Add site map",onclick:openMapDialog})
+    ]));
+    return;
+  }
+
+  const ctl=el("div",{class:"mapctl"});
+  const nsel=el("select",{title:"Which way is north on this map?"});
+  NORTH_CHOICES.forEach(n=> nsel.appendChild(el("option",{value:n.v,text:"North is "+n.t})));
+  nsel.value=String(STATE.map.north||0);
+  nsel.addEventListener("change",()=>{ STATE.map.north=+nsel.value; renderMapSetup(); autosave(); });
+  ctl.appendChild(nsel);
+  ctl.appendChild(el("button",{type:"button",text:"🔄 Replace image",onclick:openMapDialog}));
+  ctl.appendChild(el("button",{type:"button",class:"danger",text:"🗑 Remove map",onclick:removeMap}));
+  host.appendChild(ctl);
+
+  // What the next drag creates. Round tanks come out as circles.
+  const nt=el("div",{class:"mapctl",style:"margin-top:8px"});
+  nt.appendChild(el("span",{class:"stat",text:"New trace:"}));
+  const tsel=el("select",{title:"What the next box you drag will be"});
+  BARN_TYPES.forEach(tp=> tsel.appendChild(el("option",{value:tp.key,
+    text:tp.label+(tp.shape==="circle"?" ○":"")})));
+  tsel.value=NEW_TYPE;
+  tsel.addEventListener("change",()=>{ NEW_TYPE=tsel.value; });
+  nt.appendChild(tsel);
+  host.appendChild(nt);
+
+  host.appendChild(el("div",{class:"tracetip",
+    text:"Drag around each structure on the map, then name it below. Tap one to select it and drag its handles to fine-tune. Round tanks trace as a circle; everything else as a box."}));
+
+  const stage=el("div",{class:"mapstage"});
+  stage.appendChild(el("img",{src:STATE.map.src,alt:"Site map",draggable:"false"}));
+
+  const traced=STATE.order.filter(id=>STATE.barns[id].foot);
+  const numOf={}; traced.forEach((id,i)=>{ numOf[id]=i+1; });
+
+  traced.forEach(id=>{
+    const b=STATE.barns[id], r=rectOf(b.foot), isSel=(TRACE_SEL===id);
+    const round=!!b.foot.circle;
+    const box=el("div",{class:"tracebox"+(isSel?" sel":"")+(round?" round":"")});
+    const place=rr=>{
+      box.style.left=(rr.x0*100)+"%"; box.style.top=(rr.y0*100)+"%";
+      box.style.width=((rr.x1-rr.x0)*100)+"%"; box.style.height=((rr.y1-rr.y0)*100)+"%";
+    };
+    place(r);
+    box.appendChild(el("span",{class:"tag",text:numOf[id]+" · "+b.name}));
+    stage.appendChild(box);
+
+    // Rect: 4 corner handles. Circle: centre (move) + one radius handle.
+    const handles=[];
+    const handlePts = () => {
+      if (!b.foot.circle) return quadOfRect(rectOf(b.foot));
+      const c=b.foot.circle;
+      return [{x:c.cx,y:c.cy}, {x:c.cx+c.r, y:c.cy}];
+    };
+    if (isSel) handlePts().forEach((p,ci)=>{
+      const h=el("div",{class:"handle"+(round&&ci===0?" mid":"")});
+      h.style.left=(p.x*100)+"%"; h.style.top=(p.y*100)+"%";
+      h.addEventListener("pointerdown",ev=>{ ev.stopPropagation(); ev.preventDefault();
+        startDrag(ev, round ? (ci===0?"move":"radius") : ci); });
+      stage.appendChild(h); handles.push(h);
+    });
+
+    // mode: "move", "radius", or a corner index 0..3 (0=TL,1=TR,2=BR,3=BL)
+    function startDrag(ev, mode){
+      const r0=rectOf(b.foot), c0=b.foot.circle && {...b.foot.circle}, start=ptOn(stage,ev);
+      const target=ev.currentTarget;
+      target.setPointerCapture(ev.pointerId);
+      const redrawHandles=()=>handlePts().forEach((pp,k)=>{
+        if(handles[k]){ handles[k].style.left=(pp.x*100)+"%"; handles[k].style.top=(pp.y*100)+"%"; } });
+      const move=e=>{
+        const p=ptOn(stage,e), dx=p.x-start.x, dy=p.y-start.y;
+        if (c0){
+          if (mode==="radius"){
+            const ddx=p.x-c0.cx, ddy=(p.y-c0.cy)/mapAR();
+            b.foot.circle={cx:c0.cx, cy:c0.cy, r:Math.max(.01, Math.sqrt(ddx*ddx+ddy*ddy))};
+          } else {
+            b.foot.circle={cx:clamp01(c0.cx+dx), cy:clamp01(c0.cy+dy), r:c0.r};
+          }
+          place(rectOf(b.foot)); redrawHandles();
+          return;
+        }
+        let rr;
+        if (mode==="move"){
+          const w=r0.x1-r0.x0, hh=r0.y1-r0.y0;
+          const x0=Math.min(clamp01(r0.x0+dx), 1-w), y0=Math.min(clamp01(r0.y0+dy), 1-hh);
+          rr={x0,y0,x1:x0+w,y1:y0+hh};
+        } else {
+          const c=quadOfRect(r0)[mode];
+          const nx=clamp01(c.x+dx), ny=clamp01(c.y+dy);
+          const ox=(mode===0||mode===3)?r0.x1:r0.x0;
+          const oy=(mode===0||mode===1)?r0.y1:r0.y0;
+          rr={x0:Math.min(nx,ox),x1:Math.max(nx,ox),y0:Math.min(ny,oy),y1:Math.max(ny,oy)};
+        }
+        if (rr.x1-rr.x0 < .02 || rr.y1-rr.y0 < .02) return;
+        b.foot.quad=quadOfRect(rr);
+        place(rr); redrawHandles();
+      };
+      const up=()=>{
+        target.removeEventListener("pointermove",move);
+        target.removeEventListener("pointerup",up);
+        target.removeEventListener("pointercancel",up);
+        renderMapSetup(); autosave();
+      };
+      target.addEventListener("pointermove",move);
+      target.addEventListener("pointerup",up);
+      target.addEventListener("pointercancel",up);
+    }
+
+    box.addEventListener("pointerdown",ev=>{
+      ev.stopPropagation(); ev.preventDefault();
+      if (TRACE_SEL!==id){ TRACE_SEL=id; renderMapSetup(); return; }
+      startDrag(ev,"move");
+    });
+  });
+
+  // Drag on bare map = trace a new barn.
+  stage.addEventListener("pointerdown",ev=>{
+    if (ev.target!==stage && ev.target.tagName!=="IMG") return;
+    ev.preventDefault();
+    const start=ptOn(stage,ev);
+    const ghost=el("div",{class:"newbox"});
+    stage.appendChild(ghost);
+    stage.setPointerCapture(ev.pointerId);
+    const move=e=>{
+      const p=ptOn(stage,e);
+      ghost.style.left=(Math.min(start.x,p.x)*100)+"%";
+      ghost.style.top=(Math.min(start.y,p.y)*100)+"%";
+      ghost.style.width=(Math.abs(p.x-start.x)*100)+"%";
+      ghost.style.height=(Math.abs(p.y-start.y)*100)+"%";
+    };
+    const up=e=>{
+      stage.removeEventListener("pointermove",move);
+      stage.removeEventListener("pointerup",up);
+      stage.removeEventListener("pointercancel",up);
+      ghost.remove();
+      const p=ptOn(stage,e);
+      const rr={ x0:Math.min(start.x,p.x), y0:Math.min(start.y,p.y),
+                 x1:Math.max(start.x,p.x), y1:Math.max(start.y,p.y) };
+      if (rr.x1-rr.x0 < .03 || rr.y1-rr.y0 < .03){ TRACE_SEL=null; renderMapSetup(); return; }
+      addTracedBarn(rr);
+    };
+    stage.addEventListener("pointermove",move);
+    stage.addEventListener("pointerup",up);
+    stage.addEventListener("pointercancel",up);
+  });
+
+  host.appendChild(stage);
+
+  // One row per barn — traced ones carry their box number.
+  const list=el("div",{class:"tlist"});
+  if (!STATE.order.length){
+    list.appendChild(el("div",{class:"tempty",
+      text:"No barns yet — drag a box around a barn on the map above."}));
+  }
+  STATE.order.forEach(id=>{
+    const b=STATE.barns[id], isSel=(TRACE_SEL===id);
+    const row=el("div",{class:"trowb"+(isSel?" sel":"")});
+    row.appendChild(el("div",{class:"num",text:numOf[id]?String(numOf[id]):"–"}));
+
+    const nm=el("input",{type:"text",value:b.name,placeholder:"Barn name","aria-label":"Barn name"});
+    nm.addEventListener("input",()=>{ b.name=nm.value; autosave(); });
+    nm.addEventListener("change",()=>renderMapSetup());
+    nm.addEventListener("click",e=>e.stopPropagation());
+    row.appendChild(nm);
+
+    const ts=el("select",{"aria-label":"Barn type"});
+    BARN_TYPES.forEach(tp=> ts.appendChild(el("option",{value:tp.key,text:tp.label})));
+    ts.value=b.type;
+    ts.addEventListener("change",()=>{ changeBarnType(b, ts.value); autosave(); renderMapSetup(); });
+    ts.addEventListener("click",e=>e.stopPropagation());
+    row.appendChild(ts);
+
+    const rm=el("button",{class:"rm",type:"button",text:"×",title:"Remove this barn"});
+    rm.addEventListener("click",e=>{ e.stopPropagation(); removeTracedBarn(id); });
+    row.appendChild(rm);
+
+    row.addEventListener("click",()=>{ TRACE_SEL=id; renderMapSetup(); });
+    list.appendChild(row);
+  });
+  host.appendChild(list);
+
+  const extra=el("div",{class:"setup-actions"});
+  extra.appendChild(el("button",{class:"btn sm",type:"button",text:"＋ Barn not on the map",
+    onclick:()=>{
+      const type=BARN_TYPES[0].key, name=autoName(type), id=newId();
+      STATE.barns[id]=makeBarn(type,name); STATE.order.push(id);
+      renderMapSetup(); refreshStart(); autosave();
+    }}));
+  host.appendChild(extra);
+}
+
+/* ------------------------------------------------------------------ *
+ *  FORM SCREEN — this barn, zoomed; tap a corner to record its reading.
+ * ------------------------------------------------------------------ */
+function closePick(){ const w=document.querySelector(".pickwrap"); if(w) w.remove(); }
+
+function openPickMenu(barn, location, anchor){
+  closePick();
+  let row=barn.rows.find(r=>r.location.trim()===location);
+  const wrap=el("div",{class:"pickwrap"});
+  const menu=el("div",{class:"pickmenu"});
+  menu.appendChild(el("div",{class:"ph",text:location}));
+
+  const set=v=>{
+    if(!row){ row=newRow(location); barn.rows.splice(Math.max(0,barn.rows.length-1),0,row); }
+    row.notes=v;
+    ensureTrailingEmpty(STATE.active);
+    SELPIN=location; closePick(); renderPanel(); autosave();
+    toast(location.replace(" corner","")+" → "+(v||"cleared"));
+  };
+  NOTES_OPTIONS.forEach(v=>{
+    const b=el("button",{type:"button",text:v,class:(row&&row.notes===v)?"cur":""});
+    b.addEventListener("click",()=>set(v));
+    menu.appendChild(b);
+  });
+  if (row && row.notes.trim()){
+    const c=el("button",{type:"button",class:"clear",text:"Clear reading"});
+    c.addEventListener("click",()=>set(""));
+    menu.appendChild(c);
+  }
+  // Free-placed marks can also be renamed or taken off the outline.
+  if (row && row.x!==undefined){
+    const rn=el("button",{type:"button",text:"✎ Rename this point"});
+    rn.addEventListener("click",()=>{
+      const v=prompt("Name for this point:", row.location);
+      closePick();
+      if (v!==null && v.trim()){ row.location=v.trim(); SELPIN=row.location; renderPanel(); autosave(); }
+    });
+    menu.appendChild(rn);
+    const del=el("button",{type:"button",class:"clear",text:"🗑 Remove this point"});
+    del.addEventListener("click",()=>{
+      const i=barn.rows.indexOf(row);
+      if (i>-1) barn.rows.splice(i,1);
+      ensureTrailingEmpty(STATE.active);
+      SELPIN=null; closePick(); renderPanel(); autosave();
+      toast("Point removed");
+    });
+    menu.appendChild(del);
+  }
+
+  wrap.addEventListener("pointerdown",e=>{ if(e.target===wrap) closePick(); });
+  wrap.appendChild(menu);
+  document.body.appendChild(wrap);
+
+  const a=anchor.getBoundingClientRect(), m=menu.getBoundingClientRect();
+  let left=a.left+a.width/2-m.width/2, top=a.bottom+8;
+  if (top+m.height > window.innerHeight-8) top=Math.max(8, a.top-m.height-8);
+  left=Math.min(Math.max(8,left), window.innerWidth-m.width-8);
+  menu.style.left=left+"px"; menu.style.top=top+"px";
+}
+
+function buildMapSection(barn){
+  const sec=el("div",{class:"mapsec"});
+  const hdr=el("div",{class:"maphdr"},[el("h3",{text:Noun(barn.type)+" map"}),el("span",{class:"spacer"})]);
+  sec.appendChild(hdr);
+
+  if (!STATE.map){
+    sec.appendChild(el("div",{class:"tempty",
+      text:"No site map for this assessment. Open ⚙ Setup to add one, then trace each barn."}));
+    return sec;
+  }
+  if (!barn.foot){
+    sec.appendChild(el("div",{class:"tempty",
+      text:"“"+barn.name+"” isn’t traced on the site map. Open ⚙ Setup and drag a box around it to get tappable corners."}));
+    return sec;
+  }
+
+  const free=isFree(barn.type);
+  const pins=pinsFor(barn);
+  const readingAt=loc=>{ const r=barn.rows.find(x=>x.location.trim()===loc); return r?r.notes.trim():""; };
+  const done=pins.filter(p=>p.row ? p.row.notes.trim() : readingAt(p.location)).length;
+  hdr.appendChild(el("span",{class:"stat",
+    text: free
+      ? (pins.length ? done+" of "+pins.length+" points recorded · tap the outline to add another"
+                     : "tap anywhere on the outline to add a reading")
+      : done+" of "+pins.length+" corners recorded · tap a corner to set its reading"}));
+
+  const ctl=el("div",{class:"mapctl"});
+  const zb=el("button",{type:"button",class:ZOOMOUT?"":"on",
+    text:ZOOMOUT?"⤢ Whole site":"⌖ Zoomed to this "+nounOf(barn.type)});
+  zb.addEventListener("click",()=>{ ZOOMOUT=!ZOOMOUT; renderPanel(); });
+  ctl.appendChild(zb);
+  ctl.appendChild(el("span",{class:"stat",
+    text:"North is "+((NORTH_CHOICES.find(n=>n.v===mapNorth())||NORTH_CHOICES[0]).t)+" — set in ⚙ Setup"}));
+  sec.appendChild(ctl);
+
+  const crop = ZOOMOUT ? {x0:0,y0:0,w:1,h:1} : cropFor(barn.foot, 0.25);
+  const stage=el("div",{class:"mapstage zoom"+(free?" free":"")});
+  stage.style.aspectRatio=((crop.w*STATE.map.w)/(crop.h*STATE.map.h)).toFixed(4);
+  const img=el("img",{src:STATE.map.src,alt:"Map of "+barn.name,draggable:"false"});
+  img.style.width=(100/crop.w)+"%";
+  img.style.left=(-crop.x0/crop.w*100)+"%";
+  img.style.top=(-crop.y0/crop.h*100)+"%";
+  stage.appendChild(img);
+
+  const CX=x=>((x-crop.x0)/crop.w)*100, CY=y=>((y-crop.y0)/crop.h)*100;
+
+  const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
+  svg.setAttribute("class","trace"); svg.setAttribute("preserveAspectRatio","none");
+  svg.setAttribute("viewBox","0 0 100 100");
+  if (barn.foot.circle){
+    const c=barn.foot.circle, ell=document.createElementNS("http://www.w3.org/2000/svg","ellipse");
+    ell.setAttribute("cx",CX(c.cx).toFixed(2));        ell.setAttribute("cy",CY(c.cy).toFixed(2));
+    ell.setAttribute("rx",(c.r/crop.w*100).toFixed(2)); ell.setAttribute("ry",(ryOf(c.r)/crop.h*100).toFixed(2));
+    svg.appendChild(ell);
+  } else {
+    const poly=document.createElementNS("http://www.w3.org/2000/svg","polygon");
+    poly.setAttribute("points", barn.foot.quad.map(p=>CX(p.x).toFixed(2)+","+CY(p.y).toFixed(2)).join(" "));
+    svg.appendChild(poly);
+  }
+  stage.appendChild(svg);
+
+  // Free structures: tapping the outline drops a new reading point there.
+  if (free) stage.addEventListener("pointerdown",ev=>{
+    if (ev.target.closest(".pin")) return;
+    const r=stage.getBoundingClientRect();
+    const p={ x:crop.x0 + ((ev.clientX-r.left)/r.width)*crop.w,
+              y:crop.y0 + ((ev.clientY-r.top)/r.height)*crop.h };
+    const snapped=snapToOutline(barn,p);
+    // only count taps near the outline, so you can't litter points mid-map
+    const dx=(snapped.x-p.x)*STATE.map.w, dy=(snapped.y-p.y)*STATE.map.h;
+    if (Math.sqrt(dx*dx+dy*dy) > STATE.map.w*0.06) return;
+    ev.preventDefault();
+    const row=newRow(autoMarkLabel(barn,snapped),"",snapped.x,snapped.y);
+    barn.rows.splice(Math.max(0,barn.rows.length-1),0,row);
+    ensureTrailingEmpty(STATE.active);
+    SELPIN=row.location; renderPanel(); autosave();
+    const fresh=document.querySelector('.pin[data-loc="'+CSS.escape(row.location)+'"]');
+    if (fresh) openPickMenu(barn,row.location,fresh);
+  });
+
+  pins.forEach((p,i)=>{
+    const val=p.row ? p.row.notes.trim() : readingAt(p.location);
+    const b=el("button",{class:"pin"+(val?" done":"")+(SELPIN===p.location?" sel":""),
+                         type:"button",title:p.location,"data-loc":p.location,text:String(i+1)});
+    b.style.left=CX(p.x)+"%"; b.style.top=CY(p.y)+"%";
+    b.appendChild(el("span",{class:"lbl",text:p.location+(val?" — "+val:"")}));
+    b.addEventListener("pointerdown",e=>e.stopPropagation());
+    b.addEventListener("click",()=>openPickMenu(barn,p.location,b));
+    stage.appendChild(b);
+  });
+
+  sec.appendChild(stage);
+  sec.appendChild(el("div",{class:"footnote"},[
+    el("span",{text: free
+      ? "Tap along the outline to drop a reading wherever you took it — the suggested name comes from its bearing and is editable in the table below."
+      : "Green corners already have a reading. Everything you tap lands in the table below — edit or add rows there as usual."})
+  ]));
+  return sec;
+}
+
+/* ================================================================== *
  *  SAVE / LOAD  — saves a self-contained HTML you can reopen anywhere
  *  (tap the saved file to pick up exactly where you left off — works
  *   offline on iPad, no separate import step needed)
@@ -801,6 +1632,167 @@ function handleFile(file){
     }catch(e){ alert("Could not open that file:\n"+e.message); }
   };
   reader.readAsText(file);
+}
+
+/* ================================================================== *
+ *  MAP PDF  — one page per traced barn: the site map with its numbered
+ *  pins burned in, plus a legend of the readings.
+ *
+ *  Everything (titles, pins, legend) is drawn onto a canvas first, so
+ *  the PDF itself only ever holds full-page JPEGs. That means no font
+ *  embedding, no text escaping, and the canvas JPEG bytes drop straight
+ *  into the PDF via /DCTDecode — same no-library spirit as the .xlsx
+ *  writer below.
+ * ================================================================== */
+function loadMapImage(){
+  return new Promise((res,rej)=>{
+    const im=new Image();
+    im.onload=()=>res(im);
+    im.onerror=()=>rej(new Error("The site map image could not be decoded."));
+    im.src=STATE.map.src;
+  });
+}
+
+function renderBarnMapCanvas(barn, im){
+  const pins=pinsFor(barn), q=barn.foot.quad;
+  const W=Math.max(900, im.width), pad=Math.round(W*0.028);
+  const fT=Math.round(W*0.030), fS=Math.round(W*0.018), fL=Math.round(W*0.0165);
+  const headH=Math.round(pad+fT*1.35+fS*3.0);
+  // Zoom the page to this barn (with enough padding to keep its neighbours in
+  // frame) — a whole site plan would shrink the pins to nothing.
+  const crop=cropFor(barn.foot, 0.45);
+  const sx=crop.x0*im.width, sy=crop.y0*im.height;
+  const sw=crop.w*im.width,  sh=crop.h*im.height;
+  const mapW=W-pad*2, mapH=Math.round(sh*(mapW/sw));
+  const rowsN=Math.max(1,Math.ceil(pins.length/2));
+  const legH=Math.round(pad*1.2+fL*1.6*(rowsN+1));
+  const H=headH+mapH+legH+pad;
+
+  const c=document.createElement("canvas"); c.width=W; c.height=H;
+  const g=c.getContext("2d");
+  g.fillStyle="#ffffff"; g.fillRect(0,0,W,H);
+  g.textBaseline="top";
+
+  g.fillStyle="#16395a"; g.font="700 "+fT+"px Helvetica, Arial, sans-serif";
+  g.fillText(titleFor(barn), pad, pad);
+  g.fillStyle="#5b6875"; g.font=fS+"px Helvetica, Arial, sans-serif";
+  g.fillText(subLine(), pad, pad+fT*1.32);
+  const nt=(NORTH_CHOICES.find(n=>n.v===mapNorth())||NORTH_CHOICES[0]).t;
+  g.fillText("North is "+nt+" on this map", pad, pad+fT*1.32+fS*1.45);
+
+  // map + traced footprint
+  const X=p=>pad+((p.x-crop.x0)/crop.w)*mapW, Y=p=>headH+((p.y-crop.y0)/crop.h)*mapH;
+  g.drawImage(im, sx, sy, sw, sh, pad, headH, mapW, mapH);
+  g.strokeStyle="#b9c4cd"; g.lineWidth=1;
+  g.strokeRect(pad+0.5, headH+0.5, mapW-1, mapH-1);
+  g.beginPath();
+  if (barn.foot.circle){
+    const cc=barn.foot.circle, ctr={x:cc.cx,y:cc.cy};
+    g.ellipse(X(ctr), Y(ctr), (cc.r/crop.w)*mapW, (ryOf(cc.r)/crop.h)*mapH, 0, 0, Math.PI*2);
+  } else {
+    g.moveTo(X(q[0]),Y(q[0]));
+    for(let i=1;i<4;i++) g.lineTo(X(q[i]),Y(q[i]));
+    g.closePath();
+  }
+  g.fillStyle="rgba(47,128,184,.16)"; g.fill();
+  g.strokeStyle="#2f80b8"; g.lineWidth=Math.max(2,W*0.0022); g.stroke();
+
+  // numbered pins, green where a reading is already recorded
+  const R=Math.max(13, W*0.016);
+  pins.forEach((p,i)=>{
+    const row=p.row||barn.rows.find(r=>r.location.trim()===p.location);
+    const cx=X(p), cy=Y(p);
+    g.beginPath(); g.arc(cx,cy,R,0,Math.PI*2);
+    g.fillStyle=(row&&row.notes.trim())?"#2e7d32":"#1f4e79"; g.fill();
+    g.lineWidth=Math.max(2,R*0.16); g.strokeStyle="#ffffff"; g.stroke();
+    g.fillStyle="#ffffff"; g.font="700 "+Math.round(R*1.05)+"px Helvetica, Arial, sans-serif";
+    g.textAlign="center"; g.textBaseline="middle";
+    g.fillText(String(i+1), cx, cy+1);
+    g.textAlign="left"; g.textBaseline="top";
+  });
+
+  // legend: number → location → reading, two columns
+  let ly=headH+mapH+Math.round(pad*0.9);
+  g.fillStyle="#16395a"; g.font="700 "+fL+"px Helvetica, Arial, sans-serif";
+  g.fillText("Wall observations", pad, ly);
+  ly+=Math.round(fL*1.6);
+  const colW=(W-pad*2)/2;
+  pins.forEach((p,i)=>{
+    const row=p.row||barn.rows.find(r=>r.location.trim()===p.location);
+    const val=(row&&row.notes.trim())?row.notes:"—";
+    const cx=pad+(i%2)*colW, cy=ly+Math.floor(i/2)*Math.round(fL*1.6);
+    g.fillStyle="#1f2933"; g.font="700 "+fL+"px Helvetica, Arial, sans-serif";
+    g.fillText(String(i+1)+".", cx, cy);
+    g.font=fL+"px Helvetica, Arial, sans-serif";
+    g.fillText(p.location, cx+fL*1.6, cy);
+    g.fillStyle=(val==="—")?"#8a95a1":"#2e7d32";
+    g.font="700 "+fL+"px Helvetica, Arial, sans-serif";
+    g.fillText(val, cx+fL*1.6+colW*0.52, cy);
+  });
+  return c;
+}
+
+function canvasJpegBytes(c, quality){
+  const b64=c.toDataURL("image/jpeg",quality).split(",")[1];
+  const bin=atob(b64), u=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i);
+  return {bytes:u, w:c.width, h:c.height};
+}
+
+// Minimal multi-page PDF, one JPEG per page. Offsets are tracked in bytes as
+// the parts are appended so the xref table lands exactly right.
+function pdfFromJpegs(imgs){
+  const parts=[]; let len=0;
+  const raw=s=>{ const a=new Uint8Array(s.length); for(let i=0;i<s.length;i++) a[i]=s.charCodeAt(i)&255; return a; };
+  const put=x=>{ const u=(typeof x==="string")?raw(x):x; parts.push(u); len+=u.length; };
+  const off={}, n=imgs.length;
+  const pageId=i=>3+i*3, imgId=i=>4+i*3, conId=i=>5+i*3;
+
+  put("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  off[1]=len; put("1 0 obj\n<</Type/Catalog/Pages 2 0 R>>\nendobj\n");
+  const kids=[]; for(let i=0;i<n;i++) kids.push(pageId(i)+" 0 R");
+  off[2]=len; put("2 0 obj\n<</Type/Pages/Kids["+kids.join(" ")+"]/Count "+n+">>\nendobj\n");
+
+  const PW=612, PH=792, M=18;                       // US Letter, 1/4" margin
+  imgs.forEach((im,i)=>{
+    const s=Math.min((PW-2*M)/im.w,(PH-2*M)/im.h);
+    const w=im.w*s, h=im.h*s, x=(PW-w)/2, y=(PH-h)/2;
+    off[pageId(i)]=len;
+    put(pageId(i)+" 0 obj\n<</Type/Page/Parent 2 0 R/MediaBox[0 0 "+PW+" "+PH+
+        "]/Resources<</XObject<</Im0 "+imgId(i)+" 0 R>>>>/Contents "+conId(i)+" 0 R>>\nendobj\n");
+    off[imgId(i)]=len;
+    put(imgId(i)+" 0 obj\n<</Type/XObject/Subtype/Image/Width "+im.w+"/Height "+im.h+
+        "/ColorSpace/DeviceRGB/BitsPerComponent 8/Filter/DCTDecode/Length "+im.bytes.length+">>\nstream\n");
+    put(im.bytes);
+    put("\nendstream\nendobj\n");
+    const cs="q "+w.toFixed(2)+" 0 0 "+h.toFixed(2)+" "+x.toFixed(2)+" "+y.toFixed(2)+" cm /Im0 Do Q\n";
+    off[conId(i)]=len;
+    put(conId(i)+" 0 obj\n<</Length "+cs.length+">>\nstream\n"+cs+"endstream\nendobj\n");
+  });
+
+  const maxId=2+n*3, xrefAt=len;
+  let x="xref\n0 "+(maxId+1)+"\n0000000000 65535 f \n";
+  for(let id=1;id<=maxId;id++) x+=String(off[id]).padStart(10,"0")+" 00000 n \n";
+  put(x);
+  put("trailer\n<</Size "+(maxId+1)+"/Root 1 0 R>>\nstartxref\n"+xrefAt+"\n%%EOF\n");
+
+  const out=new Uint8Array(len); let o=0;
+  for(const p of parts){ out.set(p,o); o+=p.length; }
+  return new Blob([out],{type:"application/pdf"});
+}
+
+async function exportMapPdf(){
+  if (!STATE.map){ alert("Add a site map first — open ⚙ Setup and upload one."); return; }
+  const traced=STATE.order.filter(id=>STATE.barns[id].foot);
+  if (!traced.length){ alert("No barn is traced on the map yet.\n\nOpen ⚙ Setup and drag a box around each barn."); return; }
+  try{
+    const im=await loadMapImage();
+    const imgs=traced.map(id=>canvasJpegBytes(renderBarnMapCanvas(STATE.barns[id], im), 0.85));
+    const fn="Exterior Wall Map"+(STATE.site?" - "+safeName(STATE.site):"")+".pdf";
+    const how=await shareOrDownload(fn, pdfFromJpegs(imgs), "application/pdf");
+    if (how==="shared")        toast("Choose “Save to Files” to keep the PDF");
+    else if (how==="download") toast("Saved "+fn+" — "+imgs.length+" page"+(imgs.length>1?"s":""));
+  }catch(e){ alert("Could not build the map PDF:\n"+e.message); }
 }
 
 /* ================================================================== *
@@ -962,8 +1954,10 @@ function init(){
   $("#saveBtn").addEventListener("click", saveFile);
   $("#openBtn").addEventListener("click", openFileDialog);
   $("#printBtn").addEventListener("click", printReport);
+  $("#mapPdfBtn").addEventListener("click", exportMapPdf);
   $("#xlsxBtn").addEventListener("click", ()=>exportXlsx());
   $("#fileInput").addEventListener("change", e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); });
+  $("#mapInput").addEventListener("change", e=>{ if(e.target.files[0]) importMapImage(e.target.files[0]); });
   document.addEventListener("click",()=>document.querySelectorAll(".addmenu.open").forEach(m=>m.classList.remove("open")));
 
   // When served over http(s) with a sibling sw.js, register it for offline use.
@@ -973,7 +1967,14 @@ function init(){
   }
 
   window.__ewall = { STATE:()=>STATE, exportXlsx, serialize, deserialize, startFromSetup,
-                     showForm, buildPrint, addInstance, duplicateActive, saveFile, buildSelfContainedHtml };
+                     showForm, buildPrint, addInstance, duplicateActive, saveFile, buildSelfContainedHtml,
+                     computePins, edgeDirections, exportMapPdf, pdfFromJpegs, renderBarnMapCanvas,
+                     canvasJpegBytes, renderPanel, NOTES_OPTIONS, DEFAULT_LOCATIONS,
+                     renderMapSetup, addTracedBarn, quadOfRect, rectOf, cropFor, openPickMenu,
+                     importMapImage, prefillSetup, refreshStart,
+                     pinsFor, snapToOutline, autoMarkLabel, circleOfRect, reshapeFoot,
+                     changeBarnType, isFree, shapeOf, BARN_TYPES,
+                     setNewType:v=>{ NEW_TYPE=v; } };
 
   // If this file was saved with notes embedded, restore them and jump to the form.
   const embedded=document.getElementById("ewallSaved");
